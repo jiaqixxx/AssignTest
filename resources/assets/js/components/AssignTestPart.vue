@@ -29,7 +29,6 @@
             }
         },
         created() {
-            console.log('bbb');
             // EventBus.$on('test',function (value) {
             //     console.log(value);
             // });
