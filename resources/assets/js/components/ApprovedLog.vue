@@ -55,6 +55,8 @@
                         <v-select style="width: 150px; float: right"
                                   v-model="filterBug"
                                   :items="bugs"
+                                  item-text="text"
+                                  item-value="value"
                                   solo
                         ></v-select>
                     </v-flex>
@@ -73,7 +75,7 @@
         >
             <template slot="items" slot-scope="props">
                 <td class="text-xs-left">{{ props.item.id }}</td>
-                <td class="text-xs-left">{{ props.item.assignee['name'] }}</td>
+                <td class="text-xs-left">{{ props.item.name }}</td>
                 <td class="text-xs-left">{{ props.item.environment }}</td>
                 <td class="text-xs-left">
                     <p style="margin-bottom: 0;">
@@ -114,15 +116,17 @@
                     </v-dialog>
                 </td>
                 <td class="text-xs-center">
-                    <p v-if="props.item.has_comments=='0'">No</p>
                     <b v-if="props.item.is_all_good=='1'" style="color: mediumseagreen">All Good</b>
+                    <p v-if="props.item.has_comments=='0'">No</p>
                     <v-layout row justify-center v-if="props.item.has_comments=='1'">
                         <v-btn small slot="activator" color="error" @click="getComments(props.item)">Check Comments</v-btn>
-
                     </v-layout>
                 </td>
-                <td class="text-xs-left">
+                <td class="text-xs-left" v-if="props.item.is_approved==1">
                     <v-checkbox v-model="checkbox" @click.stop="unSetAssignment(props.item)"></v-checkbox>
+                </td>
+                <td class="text-xs-left" v-else="props.item.is_approved===0">
+                    <v-checkbox @click.stop="approveAssignment(props.item)"></v-checkbox>
                 </td>
             </template>
         </v-data-table>
@@ -158,15 +162,15 @@
                 orderNum: [],
                 customerDetails: [],
                 bugs: [
-                    '',
-                    'Yes',
-                    'No'
+                    {text: '', value: ''},
+                    {text: 'No', value: '0'},
+                    {text: 'Yes', value: '1'}
                 ],
                 filterBug: '',
                 approvedLogs: [],
                 approvedLogsHeader: [
                     {text: 'ID', align: 'left', value: 'id'},
-                    {text: 'Assigned Agent', align: 'left', value: 'assignee'},
+                    {text: 'Assigned Agent', align: 'left', value: 'name'},
                     {text: 'Environment', align: 'left', value: 'environment'},
                     {text: 'Order Number', align: 'left', value: 'order_items'},
                     {text: 'Product_look_up', align: 'left', value: 'product_look_up'},
@@ -183,7 +187,7 @@
         methods: {
             initialize(){
                 let app = this;
-                axios.get('getApprovedAssignments')
+                axios.get('assignments/1')
                     .then(function (response) {
                         app.approvedLogs = response.data;
                         app.pagination.totalItems = response.data.length;
@@ -195,7 +199,7 @@
             getComments(item){
                 var assignmentId = item.id;
                 let app = this;
-                axios.get('getComments/' + assignmentId)
+                axios.get('comments/' + assignmentId)
                     .then(function (response) {
                         app.comments = response.data;
                         app.dialog = true;
@@ -208,13 +212,37 @@
                 if(confirm('Are you sure to un-approve this assignment?')){
                     var assignmentId = item.id;
                     let app = this;
-                    axios.post('unSetAssignment/' + assignmentId)
+                    const params = new URLSearchParams();
+                    params.append('status', '0');
+                    params.append('assignment_id', assignmentId);
+                    axios.post('assignments', params)
                         .then(function (response) {
                             if (response.data.result == 'Failed') {
                                 alert(response.data.message);
                             } else {
                                 app.initialize();
                                 EventBus.$emit('unSetAssignment');
+                            }
+                        })
+                        .catch(function (error) {
+                            console.log(error);
+                        });
+                }
+            },
+            approveAssignment(item){
+                if(confirm('Are you sure to approve this assignment?')){
+                    var assignmentId = item.id;
+                    let app = this;
+                    const params = new URLSearchParams();
+                    params.append('status', '1');
+                    params.append('assignment_id', assignmentId);
+                    axios.post('assignments', params)
+                        .then(function (response) {
+                            if (response.data.result == 'Failed') {
+                                alert(response.data.message);
+                            } else {
+                                app.initialize();
+                                EventBus.$emit('updateInProgress');
                             }
                         })
                         .catch(function (error) {
@@ -233,17 +261,22 @@
                 var bugs = this.filterBug;
                 if(id == '' && orderNum == '' && customerDetails == '' && bugs == ''){
                     this.initialize();
+                    return false;
                 }
                 let app = this;
                 axios.get('search',{
                     params:{
                         id: id,
-                        order_num: orderNum,
+                        order_id: orderNum,
                         customer_details: customerDetails,
                         bugs: bugs
                     }
                 })
                     .then(function (response) {
+                        if(response.data.result == 'Failed'){
+                            alert(response.data.message);
+                            return false;
+                        }
                         app.approvedLogs = response.data;
                         app.pagination.totalItems = response.data.length;
                     })

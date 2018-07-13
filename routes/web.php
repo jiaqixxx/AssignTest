@@ -19,13 +19,11 @@ Route::get('/assign_test', 'SupervisorController@index')->middleware('auth')->na
 
 
 //API
-Route::get('/agents', 'AssignTestController@getAgents');
+Route::get('/users', 'AssignTestController@getAgents');
 Route::post('/assignTests', 'AssignTestController@assignTests');
-Route::get('/workload', 'AssignTestController@getWorkload');
-Route::get('/getInProgressAssignments', 'AssignTestController@getInProgressAssignments');
-Route::get('/getComments/{assignmentId}', 'AssignTestController@getComments');
-Route::post('/approveAssignment/{assignmentId}', 'AssignTestController@approveAssignment');
+Route::get('/comments/{assignmentId}', 'AssignTestController@getComments');
 
-Route::get('/getApprovedAssignments', 'AssignTestController@getApprovedAssignments');
-Route::post('/unSetAssignment/{assignmentId}', 'AssignTestController@unSetAssignment');
-Route::get('/search', 'AssignTestController@search');
+Route::get('/assignments', 'AssignmentController@getWorkload');
+Route::post('/assignments', 'AssignmentController@approveOrNotAssignment');
+Route::get('/assignments/{status}', 'AssignmentController@getAssignmentsWithStatus');
+Route::get('/search', 'AssignmentController@searchAssignment');

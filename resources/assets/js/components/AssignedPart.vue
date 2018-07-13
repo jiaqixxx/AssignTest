@@ -39,7 +39,7 @@
             >
                 <template slot="items" slot-scope="props">
                     <td class="text-xs-left">{{ props.item.id }}</td>
-                    <td class="text-xs-left">{{ props.item.assignee['name'] }}</td>
+                    <td class="text-xs-left">{{ props.item.name }}</td>
                     <td class="text-xs-left">{{ props.item.environment }}</td>
                     <td class="text-xs-left">
                         <p style="margin-bottom: 0;">
@@ -114,7 +114,7 @@
                 {text: 'ID', align: 'left', value: 'id'},
                 {text: 'Assigned Agent', align: 'left', value: 'assignee'},
                 {text: 'Environment', align: 'left', value: 'environment'},
-                {text: 'Order Number', align: 'left', value: 'order_items'},
+                {text: 'Order Number', align: 'left', value: 'name'},
                 {text: 'Product_look_up', align: 'left', value: 'product_look_up'},
                 {text: 'Customer Detail', align: 'left', value: 'customer_details'},
                 {text: 'Any Comments or Bugs to report', align: 'center', value: 'has_comments'},
@@ -132,13 +132,13 @@
             checkbox: false
         }),
         created () {
-            EventBus.$on(['updateWorkload', 'unSetAssignment'], this.initialize);
+            EventBus.$on(['updateWorkload', 'unSetAssignment', 'updateInProgress'], this.initialize);
             this.initialize();
         },
         methods: {
             initialize(){
                 let app = this;
-                axios.get('getInProgressAssignments')
+                axios.get('assignments/0')
                     .then(function (response) {
                         app.assignmentsAssigned = response.data;
                         app.pagination.totalItems = response.data.length;
@@ -150,7 +150,7 @@
             getComments(item){
                 var assignmentId = item.id;
                 let app = this;
-                axios.get('getComments/' + assignmentId)
+                axios.get('comments/' + assignmentId)
                     .then(function (response) {
                         app.comments = response.data;
                         app.dialog = true;
@@ -163,14 +163,16 @@
                 if(confirm('Are you sure to approve this assignment?')){
                     var assignmentId = item.id;
                     let app = this;
-                    axios.post('approveAssignment/' + assignmentId)
+                    const params = new URLSearchParams();
+                    params.append('status', '1');
+                    params.append('assignment_id', assignmentId);
+                    axios.post('assignments', params)
                         .then(function (response) {
                             if (response.data.result == 'Failed') {
                                 alert(response.data.message);
                             } else {
                                 app.initialize();
                                 EventBus.$emit('approveAssignment');
-                                //app.initializeApprovedLogs();
                             }
                         })
                         .catch(function (error) {

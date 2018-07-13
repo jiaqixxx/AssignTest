@@ -62,7 +62,7 @@
         methods: {
             initialize() {
                 let app = this;
-                axios.get('agents')
+                axios.get('users')
                     .then(function (response) {
                         app.agents = response.data;
                         app.agentDefault = response.data[0]['id'];
