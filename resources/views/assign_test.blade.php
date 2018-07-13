@@ -2,6 +2,6 @@
 
 @section('content')
 
-    <assign-test-part></assign-test-part>
+    <supervisor-page></supervisor-page>
 
 @endsection

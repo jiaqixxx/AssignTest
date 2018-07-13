@@ -15,12 +15,12 @@ class CreateAssignmentsTable extends Migration
     {
         Schema::create('assignments', function (Blueprint $table) {
             $table->increments('id');
-            $table->integer('orders_id');
-            $table->integer('users_id');
-            $table->integer('has_comments')->default(0);
-            $table->string('assigned_by');
-            $table->integer('is_all_good')->default(0);
-            $table->integer('is_approved')->default(0);
+            $table->integer('order_id');
+            $table->integer('assignee_id'); // user table
+            $table->boolean('has_comments')->default(0);
+            $table->integer('assigned_by'); // user table
+            $table->boolean('is_all_good')->default(0);
+            $table->boolean('is_approved')->default(0);
             $table->timestamps();
         });
     }

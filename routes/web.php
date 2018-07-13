@@ -22,4 +22,4 @@ Route::get('/assign_test', 'SupervisorController@index')->middleware('auth')->na
 Route::get('/agents', 'AssignTestController@getAgents');
 Route::post('/assignTests', 'AssignTestController@assignTests');
 Route::get('/workload', 'AssignTestController@getWorkload');
-
+Route::get('/getInProgressAssignments', 'AssignTestController@getInProgressAssignments');

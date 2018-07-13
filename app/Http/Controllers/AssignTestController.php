@@ -28,14 +28,16 @@ class AssignTestController extends Controller
 
     public function getNotAssignedOrders()
     {
-        $today = Carbon::today('Australia/Sydney')->format('Y-m-d H:i:s');
+        $today = Carbon::now()->startOfDay()->format('Y-m-d H:i:s');
         $assignedOrderIds = Assignment::select('orders_id')
             ->where('created_at', '>', $today)
             ->get();
+
         $notAssignedOrders = Orders::select('orders_id')
             ->where('created_at', '>', $today)
             ->whereNotIn('orders_id', $assignedOrderIds)
             ->get();
+
         return $notAssignedOrders;
     }
 
@@ -87,10 +89,17 @@ class AssignTestController extends Controller
 
     public function getWorkload()
     {
+        $workload = Assignment::with('assignedBy');
         $result = DB::table('assignments as a')->leftJoin('users as u', 'u.id', '=', 'a.users_id')
             ->select(DB::raw('count(*) as numAssignments, u.name'))
             ->groupBy('u.id')
             ->get();
         return $result;
+    }
+
+    public function getInProgressAssignments()
+    {
+        $inProgressAssignments = Assignment::with(['assignee','assignedBy','order'])->get();
+        return $inProgressAssignments->toArray();
     }
 }

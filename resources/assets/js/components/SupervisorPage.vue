@@ -13,6 +13,7 @@
                     <WorkloadSummary></WorkloadSummary>
                 </v-layout>
             </v-card>
+            <AssignedPart></AssignedPart>
         </v-container>
     </v-app>
 </template>
@@ -20,6 +21,7 @@
 <script>
     import AssignTest from './AssignTest.vue';
     import WorkloadSummary from './WorkloadSummary.vue';
+    import AssignedPart from './AssignedPart';
     //import {EventBus} from "../app.js";
 
     export default {
@@ -35,7 +37,8 @@
         },
         components:{
             AssignTest,
-            WorkloadSummary
+            WorkloadSummary,
+            AssignedPart
         }
     }
 </script>

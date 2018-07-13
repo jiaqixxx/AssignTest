@@ -64,12 +64,8 @@
                 let app = this;
                 axios.get('agents')
                     .then(function (response) {
-                        if (response.data.result == 'Failed') {
-                            alert(response.data.message);
-                        } else {
-                            app.agents = response.data;
-                            app.agentDefault = response.data[0]['id'];
-                        }
+                        app.agents = response.data;
+                        app.agentDefault = response.data[0]['id'];
                     })
                     .catch(function (error) {
                         console.log(error);

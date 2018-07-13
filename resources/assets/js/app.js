@@ -18,10 +18,9 @@ export const EventBus = new Vue();
 
 Vue.use(Vuetify);
 window.axios = axios;
-window.Event = new Vue;
 
 
-Vue.component('assign-test-part', require('./components/AssignTestPart.vue'));
+Vue.component('supervisor-page', require('./components/SupervisorPage.vue'));
 
 new Vue({
     el: '#app'
