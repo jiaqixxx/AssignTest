@@ -9,10 +9,6 @@ class Assignment extends Model
     //
     protected $guarded = [];
 
-
-//    protected $casts =[
-//      'order_items'=>'json'
-//    ];
     /**
      * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
      */

@@ -14,6 +14,9 @@
                 </v-layout>
             </v-card>
             <AssignedPart></AssignedPart>
+            <v-card style="margin-top: 20px">
+                <ApprovedLog></ApprovedLog>
+            </v-card>
         </v-container>
     </v-app>
 </template>
@@ -22,6 +25,7 @@
     import AssignTest from './AssignTest.vue';
     import WorkloadSummary from './WorkloadSummary.vue';
     import AssignedPart from './AssignedPart';
+    import ApprovedLog from './ApprovedLog.vue';
     //import {EventBus} from "../app.js";
 
     export default {
@@ -38,7 +42,8 @@
         components:{
             AssignTest,
             WorkloadSummary,
-            AssignedPart
+            AssignedPart,
+            ApprovedLog
         }
     }
 </script>

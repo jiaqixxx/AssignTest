@@ -23,3 +23,9 @@ Route::get('/agents', 'AssignTestController@getAgents');
 Route::post('/assignTests', 'AssignTestController@assignTests');
 Route::get('/workload', 'AssignTestController@getWorkload');
 Route::get('/getInProgressAssignments', 'AssignTestController@getInProgressAssignments');
+Route::get('/getComments/{assignmentId}', 'AssignTestController@getComments');
+Route::post('/approveAssignment/{assignmentId}', 'AssignTestController@approveAssignment');
+
+Route::get('/getApprovedAssignments', 'AssignTestController@getApprovedAssignments');
+Route::post('/unSetAssignment/{assignmentId}', 'AssignTestController@unSetAssignment');
+Route::get('/search', 'AssignTestController@search');

@@ -24,7 +24,6 @@
                 </v-card-actions>
             </v-card>
         </v-dialog>
-
         <v-card style="margin-top:20px;">
             <v-layout row>
                 <v-flex xs12>
@@ -36,11 +35,11 @@
                     class="elevation-1"
                     hide-actions
                     :headers="assignmentAssignedHeader"
-                    :pagination.sync="paginationSecond"
+                    :pagination.sync="pagination"
             >
                 <template slot="items" slot-scope="props">
                     <td class="text-xs-left">{{ props.item.id }}</td>
-                    <td class="text-xs-left">{{ props.item.name }}</td>
+                    <td class="text-xs-left">{{ props.item.assignee['name'] }}</td>
                     <td class="text-xs-left">{{ props.item.environment }}</td>
                     <td class="text-xs-left">
                         <p style="margin-bottom: 0;">
@@ -53,8 +52,8 @@
                     </td>
                     <td class="text-xs-left">{{ props.item.product_look_up }}</td>
                     <td class="text-xs-left">
-                        <v-btn @click="checkCustomerDetailsInProgress(props.item)">View Customer Details</v-btn>
-                        <v-dialog v-model="dialogCustomerDetailsInProgress" max-width="700px">
+                        <v-btn @click="checkCustomerDetails(props.item)">View Customer Details</v-btn>
+                        <v-dialog v-model="dialogCustomerDetails" max-width="700px">
                             <v-card>
                                 <v-card-title>
                                     <span class="headline">Customer Details</span>
@@ -68,14 +67,14 @@
                                                 :label="key"
                                                 v-model="customerDetailsPopUp[key]"
                                                 append-icon='content_copy'
-                                                @click='copy(index)'
+                                                @click:append='copy(index)'
                                         >
                                         </v-text-field>
                                     </div>
                                 </v-card-text>
                                 <v-divider></v-divider>
                                 <v-card-actions>
-                                    <v-btn color="blue darken-1" flat @click.native="dialogCustomerDetailsInProgress = false">Close</v-btn>
+                                    <v-btn color="blue darken-1" flat @click.native="dialogCustomerDetails = false">Close</v-btn>
                                 </v-card-actions>
                             </v-card>
                         </v-dialog>
@@ -87,32 +86,33 @@
                             <v-btn small slot="activator" color="error" @click="getComments(props.item)">Check Comments</v-btn>
                         </v-layout>
                     </td>
-                    <td class="text-xs-left">
-                        <v-checkbox v-model="approveBox[props.item.id]"  @click.stop="approveAssignment(props.item)"></v-checkbox>
+                    <td class="text-xs-center">
+                        <v-checkbox v-model="checkbox"  @click.stop="approveAssignment(props.item)"></v-checkbox>
                     </td>
                 </template>
             </v-data-table>
             <div class="text-xs-center pt-2">
                 <v-pagination
-                        v-model="paginationSecond.page"
-                        :length="pagesSecond"
+                        v-model="pagination.page"
+                        :length="pages"
                 ></v-pagination>
             </div>
         </v-card>
     </div>
-
 </template>
 
 <script>
+    import {EventBus} from "../app";
+
     export default {
         data: () => ({
-            paginationSecond: {
+            pagination: {
                 rowsPerPage: 3,
                 totalItems: 0
             },
             assignmentAssignedHeader: [
                 {text: 'ID', align: 'left', value: 'id'},
-                {text: 'Assigned Agent', align: 'left', value: 'name'},
+                {text: 'Assigned Agent', align: 'left', value: 'assignee'},
                 {text: 'Environment', align: 'left', value: 'environment'},
                 {text: 'Order Number', align: 'left', value: 'order_items'},
                 {text: 'Product_look_up', align: 'left', value: 'product_look_up'},
@@ -122,39 +122,65 @@
             ],
             assignmentsAssigned: [],
             dialog: false,
-            dialogCustomerDetailsInProgress: false,
+            dialogCustomerDetails: false,
             customerDetailsPopUp: [],
             commentsHeader: [
                 {text: 'Comment', align: 'left', value: 'comment'},
                 {text: 'Uploaded File', align: 'left', value: 'uploaded_file'},
             ],
             comments: [],
-            approveBox: []
+            checkbox: false
         }),
         created () {
-            this.initializeInProgressAssignments();
+            EventBus.$on(['updateWorkload', 'unSetAssignment'], this.initialize);
+            this.initialize();
         },
         methods: {
-            initializeInProgressAssignments(){
+            initialize(){
                 let app = this;
                 axios.get('getInProgressAssignments')
                     .then(function (response) {
                         app.assignmentsAssigned = response.data;
-                        app.paginationSecond.totalItems = response.data.length;
+                        app.pagination.totalItems = response.data.length;
                     })
                     .catch(function (error) {
                         console.log(error);
                     });
             },
             getComments(item){
-
+                var assignmentId = item.id;
+                let app = this;
+                axios.get('getComments/' + assignmentId)
+                    .then(function (response) {
+                        app.comments = response.data;
+                        app.dialog = true;
+                    })
+                    .catch(function (error) {
+                        console.log(error);
+                    });
             },
             approveAssignment(item){
-
+                if(confirm('Are you sure to approve this assignment?')){
+                    var assignmentId = item.id;
+                    let app = this;
+                    axios.post('approveAssignment/' + assignmentId)
+                        .then(function (response) {
+                            if (response.data.result == 'Failed') {
+                                alert(response.data.message);
+                            } else {
+                                app.initialize();
+                                EventBus.$emit('approveAssignment');
+                                //app.initializeApprovedLogs();
+                            }
+                        })
+                        .catch(function (error) {
+                            console.log(error);
+                        });
+                }
             },
-            checkCustomerDetailsInProgress(item){
+            checkCustomerDetails(item){
                 this.customerDetailsPopUp = item.customer_details;
-                this.dialogCustomerDetailsInProgress = true;
+                this.dialogCustomerDetails = true;
             },
             copy(index) {
                 var input = this.$refs.input[index];
@@ -164,11 +190,11 @@
             },
         },
         computed: {
-            pagesSecond () {
-                if (this.paginationSecond.rowsPerPage == null ||
-                    this.paginationSecond.totalItems == null
+            pages () {
+                if (this.pagination.rowsPerPage == null ||
+                    this.pagination.totalItems == null
                 ) return 0;
-                return Math.ceil(this.paginationSecond.totalItems / this.paginationSecond.rowsPerPage)
+                return Math.ceil(this.pagination.totalItems / this.pagination.rowsPerPage)
             }
         }
     }

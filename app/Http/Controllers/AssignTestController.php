@@ -2,12 +2,13 @@
 
 namespace App\Http\Controllers;
 
+use App\Comment;
+use App\Order;
 use App\User;
 use App\Orders;
 use App\Assignment;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
-use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Validator;
@@ -29,15 +30,14 @@ class AssignTestController extends Controller
     public function getNotAssignedOrders()
     {
         $today = Carbon::now()->startOfDay()->format('Y-m-d H:i:s');
-        $assignedOrderIds = Assignment::select('orders_id')
+        $assignedOrderIds = Assignment::select('order_id')
             ->where('created_at', '>', $today)
             ->get();
 
-        $notAssignedOrders = Orders::select('orders_id')
+        $notAssignedOrders = Order::select('id')
             ->where('created_at', '>', $today)
-            ->whereNotIn('orders_id', $assignedOrderIds)
+            ->whereNotIn('id', $assignedOrderIds)
             ->get();
-
         return $notAssignedOrders;
     }
 
@@ -70,9 +70,9 @@ class AssignTestController extends Controller
                 $notAssigned = $notAssigned->random($numAssignments)->toArray();
                 foreach ($notAssigned as $index => $orders) {
                     $result = new Assignment([
-                        'orders_id' => $orders['orders_id'],
-                        'users_id' => $agentId,
-                        'assigned_by' => 'Admin'
+                        'order_id' => $orders['id'],
+                        'assignee_id' => $agentId,
+                        'assigned_by' => '2'
                     ]);
                     $result->save();
                 }
@@ -89,17 +89,109 @@ class AssignTestController extends Controller
 
     public function getWorkload()
     {
-        $workload = Assignment::with('assignedBy');
-        $result = DB::table('assignments as a')->leftJoin('users as u', 'u.id', '=', 'a.users_id')
-            ->select(DB::raw('count(*) as numAssignments, u.name'))
-            ->groupBy('u.id')
-            ->get();
-        return $result;
+        $workloads = Assignment::leftJoin('users', 'assignments.assignee_id', '=', 'users.id')
+            ->selectRaw(
+                'count(*) as numAssignments, users.name'
+            )
+            ->groupBy('users.id')->get();
+
+        return $workloads;
     }
 
     public function getInProgressAssignments()
     {
-        $inProgressAssignments = Assignment::with(['assignee','assignedBy','order'])->get();
-        return $inProgressAssignments->toArray();
+        $inProgressAssignments = Assignment::with(['assignee:id,name', 'order'])
+            ->where('is_approved', '=', 0)->get()->toArray();
+        foreach ($inProgressAssignments as $index => $assignment) {
+            $inProgressAssignments[$index]['environment'] = $assignment['order']['environment'];
+            $inProgressAssignments[$index]['product_look_up'] = $assignment['order']['product_look_up'];
+            $inProgressAssignments[$index]['order_items'] = $assignment['order']['order_items'];
+            $inProgressAssignments[$index]['customer_details'] = $assignment['order']['customer_details'];
+        }
+        return $inProgressAssignments;
+    }
+
+    public function getComments($assignmentId)
+    {
+        $comments = Comment::select('comment', 'uploaded_file')
+            ->where('assignment_id', '=', $assignmentId)
+            ->get();
+        return $comments;
+    }
+
+    public function approveAssignment($assignmentId)
+    {
+        $result = Assignment::where('id', '=', $assignmentId)
+            ->update(['is_approved' => 1]);
+        if ($result) {
+            return $result;
+        } else {
+            return json_encode(['result' => 'Failed', 'message' => 'Failed to approve assignment']);
+        }
+    }
+
+    public function getApprovedAssignments()
+    {
+        $approvedAssignments = Assignment::with(['assignee:id,name', 'order'])
+            ->where('is_approved', '=', 1)->get()->toArray();
+        foreach ($approvedAssignments as $index => $assignment) {
+            $approvedAssignments[$index]['environment'] = $assignment['order']['environment'];
+            $approvedAssignments[$index]['product_look_up'] = $assignment['order']['product_look_up'];
+            $approvedAssignments[$index]['order_items'] = $assignment['order']['order_items'];
+            $approvedAssignments[$index]['customer_details'] = $assignment['order']['customer_details'];
+        }
+        return $approvedAssignments;
+    }
+
+    public function unSetAssignment($assignmentId)
+    {
+        $result = Assignment::where('id', '=', $assignmentId)
+            ->update(['is_approved' => 0]);
+        if ($result) {
+            return $result;
+        } else {
+            return json_encode(['result' => 'Failed', 'message' => 'Failed to approve assignment']);
+        }
+    }
+
+    public function search(Request $request)
+    {
+        $rules = [
+            'id' => 'string|nullable',
+            'order_num' => 'string|nullable',
+            'customer_details' => 'string|nullable',
+            'bugs' => 'integer|nullable|in:0,1'
+        ];
+
+        $validator = Validator::make($request->all(),$rules);
+
+        if($validator->fails()){
+            return false;
+        }
+        $result = Assignment::with(['assignee:id,name', 'order']);
+        if ($request->id) {
+            $result->where('id', '=', $request->id);
+        }
+        if ($request->order_num) {
+            $result->where('order_id', '=', $request->order_num);
+        }
+        if ($request->customer_details) {
+            $result->where('orders.customer_details', 'like', '%' . $request->customer_details . '%');
+        }
+        if ($request->bugs) {
+            if ($request->bugs == 'Yes') {
+                $result->where('has_comments', '=', 1);
+            } else if ($request->bugs == 'No') {
+                $result->where('has_comments', '=', 0);
+            }
+        }
+        $result = $result->get();
+        foreach ($result as $index => $assignment) {
+            $result[$index]['environment'] = $assignment['order']['environment'];
+            $result[$index]['product_look_up'] = $assignment['order']['product_look_up'];
+            $result[$index]['order_items'] = $assignment['order']['order_items'];
+            $result[$index]['customer_details'] = $assignment['order']['customer_details'];
+        }
+        return $result;
     }
 }

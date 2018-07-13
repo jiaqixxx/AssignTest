@@ -19,6 +19,9 @@ export const EventBus = new Vue();
 Vue.use(Vuetify);
 window.axios = axios;
 
+import VuetifyClipboard from 'vuetify-clipboard-input';
+
+Vue.use(VuetifyClipboard);
 
 Vue.component('supervisor-page', require('./components/SupervisorPage.vue'));
 
