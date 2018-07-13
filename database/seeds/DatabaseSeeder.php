@@ -24,14 +24,14 @@ class DatabaseSeeder extends Seeder
 
         $user1 = new \App\User([
             'email' => 'test@gmail.com',
-            'password' => '123123',
+            'password' => bcrypt('123123'),
             'name' => 'test'
         ]);
         $user1->save();
 
         $user2 = new \App\User([
             'email' => 'admin@gmail.com',
-            'password' => '123123',
+            'password' => bcrypt('123123'),
             'name' => 'admin'
         ]);
         $user2->save();
