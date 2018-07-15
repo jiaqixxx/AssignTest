@@ -13378,7 +13378,7 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
     methods: {
         initialize: function initialize() {
             var app = this;
-            axios.get('assignments/1').then(function (response) {
+            axios.get('api/assignments/1').then(function (response) {
                 app.approvedLogs = response.data;
                 app.pagination.totalItems = response.data.length;
             }).catch(function (error) {
@@ -13388,7 +13388,7 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
         getComments: function getComments(item) {
             var assignmentId = item.id;
             var app = this;
-            axios.get('comments/' + assignmentId).then(function (response) {
+            axios.get('api/comments/' + assignmentId).then(function (response) {
                 app.comments = response.data;
                 app.dialog = true;
             }).catch(function (error) {
@@ -13402,7 +13402,7 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
                 var params = new URLSearchParams();
                 params.append('status', '0');
                 params.append('assignment_id', assignmentId);
-                axios.post('assignments', params).then(function (response) {
+                axios.post('api/assignments', params).then(function (response) {
                     if (response.data.result == 'Failed') {
                         alert(response.data.message);
                     } else {
@@ -13421,7 +13421,7 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
                 var params = new URLSearchParams();
                 params.append('status', '1');
                 params.append('assignment_id', assignmentId);
-                axios.post('assignments', params).then(function (response) {
+                axios.post('api/assignments', params).then(function (response) {
                     if (response.data.result == 'Failed') {
                         alert(response.data.message);
                     } else {
@@ -13447,7 +13447,7 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
                 return false;
             }
             var app = this;
-            axios.get('search', {
+            axios.get('api/search', {
                 params: {
                     id: id,
                     order_id: orderNum,
@@ -13552,7 +13552,7 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
     methods: {
         initialize: function initialize() {
             var app = this;
-            axios.get('users').then(function (response) {
+            axios.get('api/users').then(function (response) {
                 app.agents = response.data;
                 app.agentDefault = response.data[0]['id'];
             }).catch(function (error) {
@@ -13569,7 +13569,7 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
             var params = new URLSearchParams();
             params.append('agentId', agentId);
             params.append('numAssignments', numAssignments);
-            axios.post('assignTests', params).then(function (response) {
+            axios.post('api/assignTests', params).then(function (response) {
                 if (response.data.result == 'Failed') {
                     alert(response.data.message);
                 } else {
@@ -13721,7 +13721,7 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
     methods: {
         initialize: function initialize() {
             var app = this;
-            axios.get('assignments/0').then(function (response) {
+            axios.get('api/assignments/0').then(function (response) {
                 app.assignmentsAssigned = response.data;
                 app.pagination.totalItems = response.data.length;
             }).catch(function (error) {
@@ -13731,7 +13731,7 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
         getComments: function getComments(item) {
             var assignmentId = item.id;
             var app = this;
-            axios.get('comments/' + assignmentId).then(function (response) {
+            axios.get('api/comments/' + assignmentId).then(function (response) {
                 app.comments = response.data;
                 app.dialog = true;
             }).catch(function (error) {
@@ -13745,7 +13745,7 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
                 var params = new URLSearchParams();
                 params.append('status', '1');
                 params.append('assignment_id', assignmentId);
-                axios.post('assignments', params).then(function (response) {
+                axios.post('api/assignments', params).then(function (response) {
                     if (response.data.result == 'Failed') {
                         alert(response.data.message);
                     } else {
@@ -13889,7 +13889,7 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
     methods: {
         initialize: function initialize() {
             var app = this;
-            axios.get('assignments').then(function (response) {
+            axios.get('api/assignments').then(function (response) {
                 app.workloadSummary = response.data;
                 app.pagination.totalItems = response.data.length;
             }).catch(function (error) {

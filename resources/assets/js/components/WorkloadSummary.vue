@@ -44,7 +44,7 @@
         methods: {
             initialize(){
                 let app = this;
-                axios.get('assignments')
+                axios.get('api/assignments')
                     .then(function (response) {
                         app.workloadSummary = response.data;
                         app.pagination.totalItems = response.data.length;

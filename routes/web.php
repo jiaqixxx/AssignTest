@@ -15,15 +15,5 @@
 Auth::routes();
 
 Route::get('/', 'HomeController@index')->name('home');
-Route::get('/assign_test', 'SupervisorController@index')->middleware('auth')->name('assign_test');
-
-
-//API
-Route::get('/users', 'AssignTestController@getAgents');
-Route::post('/assignTests', 'AssignTestController@assignTests');
-Route::get('/comments/{assignmentId}', 'AssignTestController@getComments');
-
-Route::get('/assignments', 'AssignmentController@getWorkload');
-Route::post('/assignments', 'AssignmentController@approveOrNotAssignment');
-Route::get('/assignments/{status}', 'AssignmentController@getAssignmentsWithStatus');
-Route::get('/search', 'AssignmentController@searchAssignment');
+Route::get('/your_assignments', 'AgentViewController@index')->name('your_assignments');
+Route::get('/assign_test', 'SupervisorViewController@index')->name('assign_test');

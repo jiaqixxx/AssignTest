@@ -138,7 +138,7 @@
         methods: {
             initialize(){
                 let app = this;
-                axios.get('assignments/0')
+                axios.get('api/assignments/0')
                     .then(function (response) {
                         app.assignmentsAssigned = response.data;
                         app.pagination.totalItems = response.data.length;
@@ -150,7 +150,7 @@
             getComments(item){
                 var assignmentId = item.id;
                 let app = this;
-                axios.get('comments/' + assignmentId)
+                axios.get('api/comments/' + assignmentId)
                     .then(function (response) {
                         app.comments = response.data;
                         app.dialog = true;
@@ -166,7 +166,7 @@
                     const params = new URLSearchParams();
                     params.append('status', '1');
                     params.append('assignment_id', assignmentId);
-                    axios.post('assignments', params)
+                    axios.post('api/assignments', params)
                         .then(function (response) {
                             if (response.data.result == 'Failed') {
                                 alert(response.data.message);

@@ -62,7 +62,7 @@
         methods: {
             initialize() {
                 let app = this;
-                axios.get('users')
+                axios.get('api/users')
                     .then(function (response) {
                         app.agents = response.data;
                         app.agentDefault = response.data[0]['id'];
@@ -81,7 +81,7 @@
                 const params = new URLSearchParams();
                 params.append('agentId', agentId);
                 params.append('numAssignments', numAssignments);
-                axios.post('assignTests', params)
+                axios.post('api/assignTests', params)
                     .then(function (response) {
                         if (response.data.result == 'Failed') {
                             alert(response.data.message);

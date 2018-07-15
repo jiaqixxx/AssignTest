@@ -13,7 +13,15 @@ use Illuminate\Http\Request;
 |
 */
 
-Route::middleware('auth:api')->get('/user', function (Request $request) {
-    return $request->user();
-});
+//Route::middleware('auth:api')->get('/user', function (Request $request) {
+    //return $request->user();
+//});
 
+Route::get('/users', 'AssignTestController@getAgents');
+Route::post('/assignTests', 'AssignTestController@assignTests');
+Route::get('/comments/{assignmentId}', 'AssignTestController@getComments');
+
+Route::get('/assignments', 'AssignmentController@getWorkload');
+Route::post('/assignments', 'AssignmentController@approveOrNotAssignment');
+Route::get('/assignments/{status}', 'AssignmentController@getAssignmentsWithStatus');
+Route::get('/search', 'AssignmentController@searchAssignment');
