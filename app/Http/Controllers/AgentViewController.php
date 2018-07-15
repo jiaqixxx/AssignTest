@@ -14,7 +14,11 @@ class AgentViewController extends Controller
 
     public function index()
     {
-        return view('your_assignments');
+        if(\Auth::user()->role == 'admin'){
+            return redirect()->route('assign_test');
+        }else{
+            return view('your_assignments');
+        }
     }
 
 }

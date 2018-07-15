@@ -7,6 +7,7 @@ use Validator;
 use Carbon\Carbon;
 use App\Order;
 use App\Assignment;
+use Auth;
 
 class AssignmentController extends Controller
 {
@@ -103,5 +104,21 @@ class AssignmentController extends Controller
             $assignments[$index]['customer_details'] = json_decode($assignment['customer_details']);
         }
         return $assignments;
+    }
+
+    public function getAgentAssignments(){
+        $agentId = Auth::user()->id;
+        $assignments = Assignment::leftJoin('users', 'assignments.assignee_id', '=', 'users.id')
+            ->leftJoin('orders', 'assignments.order_id', '=', 'orders.id')
+            ->where('is_approved', '=', 0)
+            ->where('assignee_id', $agentId)
+            ->select('orders.order_items', 'orders.customer_details', 'orders.environment', 'orders.product_look_up', 'assignments.*', 'users.name')
+            ->get();
+        foreach($assignments as $index=>$assignment){
+            $assignments[$index]['order_items'] = json_decode($assignment['order_items']);
+            $assignments[$index]['customer_details'] = json_decode($assignment['customer_details']);
+        }
+        return $assignments;
+
     }
 }

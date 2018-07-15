@@ -25,3 +25,5 @@ Route::get('/assignments', 'AssignmentController@getWorkload');
 Route::post('/assignments', 'AssignmentController@approveOrNotAssignment');
 Route::get('/assignments/{status}', 'AssignmentController@getAssignmentsWithStatus');
 Route::get('/search', 'AssignmentController@searchAssignment');
+
+Route::get('/agents/assignments', 'AssignmentController@getAgentAssignments');

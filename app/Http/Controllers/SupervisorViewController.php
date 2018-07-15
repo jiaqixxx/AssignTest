@@ -19,7 +19,11 @@ class SupervisorViewController extends Controller
 
     public function index()
     {
-        return view('assign_test');
+        if(\Auth::user()->role == 'admin') {
+            return view('assign_test');
+        }else{
+            return redirect()->route('your_assignments');
+        }
     }
 
     /**

@@ -469,6 +469,7 @@ window.axios = __WEBPACK_IMPORTED_MODULE_2_axios___default.a;
 __WEBPACK_IMPORTED_MODULE_0_vue___default.a.use(__WEBPACK_IMPORTED_MODULE_3_vuetify_clipboard_input__["a" /* default */]);
 
 __WEBPACK_IMPORTED_MODULE_0_vue___default.a.component('supervisor-page', __webpack_require__(54));
+__WEBPACK_IMPORTED_MODULE_0_vue___default.a.component('agent-page', __webpack_require__(87));
 
 new __WEBPACK_IMPORTED_MODULE_0_vue___default.a({
   el: '#app'
@@ -65421,6 +65422,408 @@ module.exports = function(module) {
 __webpack_require__(2);
 module.exports = __webpack_require__(15);
 
+
+/***/ }),
+/* 72 */,
+/* 73 */,
+/* 74 */,
+/* 75 */,
+/* 76 */,
+/* 77 */,
+/* 78 */,
+/* 79 */,
+/* 80 */,
+/* 81 */,
+/* 82 */,
+/* 83 */,
+/* 84 */,
+/* 85 */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
+function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
+
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+
+/* harmony default export */ __webpack_exports__["default"] = ({
+    data: function data() {
+        return _defineProperty({
+            agentAssignments: [],
+            agentAssignmentsHeader: [{ text: 'ID', align: 'left', value: 'id' }, { text: 'Assigned Agent', align: 'left', value: 'name' }, { text: 'Environment', align: 'left', value: 'environment' }, { text: 'Order Number', align: 'left', value: 'order_items' }, { text: 'Product_look_up', align: 'left', value: 'product_look_up' }, { text: 'Customer Detail', align: 'left', value: 'customer_details' }, { text: 'Any Comments or Bugs to report', align: 'center', value: 'has_comments' }],
+            pagination: {
+                rowsPerPage: 6,
+                totalItems: 0
+            },
+            dialogCustomerDetails: [],
+            customerDetailsPopUp: []
+        }, 'dialogCustomerDetails', false);
+    },
+    created: function created() {
+        //EventBus.$on('approveAssignment', this.initialize);
+        this.initialize();
+    },
+
+    methods: {
+        initialize: function initialize() {
+            var app = this;
+            axios.get('api/agents/assignments').then(function (response) {
+                app.agentAssignments = response.data;
+                app.pagination.totalItems = response.data.length;
+            }).catch(function (error) {
+                console.log(error);
+            });
+        },
+        getComments: function getComments(item) {
+            var assignmentId = item.id;
+            var app = this;
+            axios.get('api/comments/' + assignmentId).then(function (response) {
+                app.comments = response.data;
+                app.dialog = true;
+            }).catch(function (error) {
+                console.log(error);
+            });
+        },
+        checkCustomerDetails: function checkCustomerDetails(item) {
+            this.customerDetailsPopUp = item.customer_details;
+            this.dialogCustomerDetails = true;
+        },
+        copy: function copy(index) {
+            var input = this.$refs.input[index];
+            input.focus();
+            document.execCommand('selectAll');
+            this.copied = document.execCommand('copy');
+        }
+    },
+    computed: {
+        pages: function pages() {
+            if (this.pagination.rowsPerPage == null || this.pagination.totalItems == null) return 0;
+            return Math.ceil(this.pagination.totalItems / this.pagination.rowsPerPage);
+        }
+    }
+});
+
+/***/ }),
+/* 86 */
+/***/ (function(module, exports, __webpack_require__) {
+
+exports = module.exports = __webpack_require__(3)();
+exports.push([module.i, "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n", ""]);
+
+/***/ }),
+/* 87 */
+/***/ (function(module, exports, __webpack_require__) {
+
+
+/* styles */
+__webpack_require__(89)
+
+var Component = __webpack_require__(1)(
+  /* script */
+  __webpack_require__(85),
+  /* template */
+  __webpack_require__(88),
+  /* scopeId */
+  "data-v-429f3e6f",
+  /* cssModules */
+  null
+)
+Component.options.__file = "/Applications/XAMPP/xamppfiles/htdocs/AssignTest/resources/assets/js/components/AgentPage.vue"
+if (Component.esModule && Object.keys(Component.esModule).some(function (key) {return key !== "default" && key !== "__esModule"})) {console.error("named exports are not supported in *.vue files.")}
+if (Component.options.functional) {console.error("[vue-loader] AgentPage.vue: functional components are not supported with templates, they should use render functions.")}
+
+/* hot reload */
+if (false) {(function () {
+  var hotAPI = require("vue-hot-reload-api")
+  hotAPI.install(require("vue"), false)
+  if (!hotAPI.compatible) return
+  module.hot.accept()
+  if (!module.hot.data) {
+    hotAPI.createRecord("data-v-429f3e6f", Component.options)
+  } else {
+    hotAPI.reload("data-v-429f3e6f", Component.options)
+  }
+})()}
+
+module.exports = Component.exports
+
+
+/***/ }),
+/* 88 */
+/***/ (function(module, exports, __webpack_require__) {
+
+module.exports={render:function (){var _vm=this;var _h=_vm.$createElement;var _c=_vm._self._c||_h;
+  return _c('v-app', {
+    attrs: {
+      "id": "inspire"
+    }
+  }, [_c('v-container', {
+    staticStyle: {
+      "max-width": "100%",
+      "width": "100%"
+    },
+    attrs: {
+      "grid-list-md": "",
+      "text-xs-center": ""
+    }
+  }, [_c('v-card', [_c('v-layout', {
+    attrs: {
+      "row": ""
+    }
+  }, [_c('v-flex', {
+    attrs: {
+      "xs12": ""
+    }
+  }, [_c('h3', {
+    staticStyle: {
+      "float": "left",
+      "margin": "20px"
+    }
+  }, [_vm._v("Your Assignments")])])], 1), _vm._v(" "), _c('v-data-table', {
+    staticClass: "elevation-1",
+    attrs: {
+      "items": _vm.agentAssignments,
+      "hide-actions": "",
+      "headers": _vm.agentAssignmentsHeader,
+      "pagination": _vm.pagination
+    },
+    on: {
+      "update:pagination": function($event) {
+        _vm.pagination = $event
+      }
+    },
+    scopedSlots: _vm._u([{
+      key: "items",
+      fn: function(props) {
+        return [_c('td', {
+          staticClass: "text-xs-left"
+        }, [_vm._v(_vm._s(props.item.id))]), _vm._v(" "), _c('td', {
+          staticClass: "text-xs-left"
+        }, [_vm._v(_vm._s(props.item.name))]), _vm._v(" "), _c('td', {
+          staticClass: "text-xs-left"
+        }, [_vm._v(_vm._s(props.item.environment))]), _vm._v(" "), _c('td', {
+          staticClass: "text-xs-left"
+        }, [_c('p', {
+          staticStyle: {
+            "margin-bottom": "0"
+          }
+        }, [_vm._v("\n                            " + _vm._s(props.item.order_id) + "\n                        ")]), _vm._v(" "), _c('b', {
+          staticStyle: {
+            "margin-bottom": "0"
+          }
+        }, [_vm._v("Items: ")]), _vm._v(" "), _vm._l((props.item.order_items), function(item) {
+          return _c('p', {
+            staticStyle: {
+              "margin-bottom": "0"
+            }
+          }, [_vm._v("\n                            " + _vm._s(item) + "\n                        ")])
+        })], 2), _vm._v(" "), _c('td', {
+          staticClass: "text-xs-left"
+        }, [_vm._v(_vm._s(props.item.product_look_up))]), _vm._v(" "), _c('td', {
+          staticClass: "text-xs-left"
+        }, [_c('v-btn', {
+          on: {
+            "click": function($event) {
+              _vm.checkCustomerDetails(props.item)
+            }
+          }
+        }, [_vm._v("View Customer Details")]), _vm._v(" "), _c('v-dialog', {
+          attrs: {
+            "max-width": "700px"
+          },
+          model: {
+            value: (_vm.dialogCustomerDetails),
+            callback: function($$v) {
+              _vm.dialogCustomerDetails = $$v
+            },
+            expression: "dialogCustomerDetails"
+          }
+        }, [_c('v-card', [_c('v-card-title', [_c('span', {
+          staticClass: "headline"
+        }, [_vm._v("Customer Details")])]), _vm._v(" "), _c('v-card-text', _vm._l((props.item.customer_details), function(value, key, index) {
+          return _c('div', [_c('v-text-field', {
+            ref: "input",
+            refInFor: true,
+            staticClass: "key",
+            attrs: {
+              "readonly": "",
+              "label": key,
+              "append-icon": "content_copy"
+            },
+            on: {
+              "click:append": function($event) {
+                _vm.copy(index)
+              }
+            },
+            model: {
+              value: (_vm.customerDetailsPopUp[key]),
+              callback: function($$v) {
+                _vm.$set(_vm.customerDetailsPopUp, key, $$v)
+              },
+              expression: "customerDetailsPopUp[key]"
+            }
+          })], 1)
+        })), _vm._v(" "), _c('v-divider'), _vm._v(" "), _c('v-card-actions', [_c('v-btn', {
+          attrs: {
+            "color": "blue darken-1",
+            "flat": ""
+          },
+          nativeOn: {
+            "click": function($event) {
+              _vm.dialogCustomerDetails = false
+            }
+          }
+        }, [_vm._v("Close")])], 1)], 1)], 1)], 1), _vm._v(" "), _c('td', {
+          staticClass: "text-xs-center"
+        }, [(props.item.is_all_good == '1') ? _c('b', {
+          staticStyle: {
+            "color": "mediumseagreen"
+          }
+        }, [_vm._v("All Good")]) : _vm._e(), _vm._v(" "), (props.item.has_comments == '0') ? _c('p', [_vm._v("No")]) : _vm._e(), _vm._v(" "), (props.item.has_comments == '1') ? _c('v-layout', {
+          attrs: {
+            "row": "",
+            "justify-center": ""
+          }
+        }, [_c('v-btn', {
+          attrs: {
+            "slot": "activator",
+            "small": "",
+            "color": "error"
+          },
+          on: {
+            "click": function($event) {
+              _vm.getComments(props.item)
+            }
+          },
+          slot: "activator"
+        }, [_vm._v("Check Comments")])], 1) : _vm._e()], 1)]
+      }
+    }])
+  }), _vm._v(" "), _c('div', {
+    staticClass: "text-xs-center pt-2"
+  }, [_c('v-pagination', {
+    attrs: {
+      "length": _vm.pages
+    },
+    model: {
+      value: (_vm.pagination.page),
+      callback: function($$v) {
+        _vm.$set(_vm.pagination, "page", $$v)
+      },
+      expression: "pagination.page"
+    }
+  })], 1)], 1)], 1)], 1)
+},staticRenderFns: []}
+module.exports.render._withStripped = true
+if (false) {
+  module.hot.accept()
+  if (module.hot.data) {
+     require("vue-hot-reload-api").rerender("data-v-429f3e6f", module.exports)
+  }
+}
+
+/***/ }),
+/* 89 */
+/***/ (function(module, exports, __webpack_require__) {
+
+// style-loader: Adds some css to the DOM by adding a <style> tag
+
+// load the styles
+var content = __webpack_require__(86);
+if(typeof content === 'string') content = [[module.i, content, '']];
+if(content.locals) module.exports = content.locals;
+// add the styles to the DOM
+var update = __webpack_require__(4)("793039a8", content, false);
+// Hot Module Replacement
+if(false) {
+ // When the styles change, update the <style> tags
+ if(!content.locals) {
+   module.hot.accept("!!../../../../node_modules/css-loader/index.js!../../../../node_modules/vue-loader/lib/style-compiler/index.js?{\"id\":\"data-v-429f3e6f\",\"scoped\":true,\"hasInlineConfig\":true}!../../../../node_modules/vue-loader/lib/selector.js?type=styles&index=0!./AgentPage.vue", function() {
+     var newContent = require("!!../../../../node_modules/css-loader/index.js!../../../../node_modules/vue-loader/lib/style-compiler/index.js?{\"id\":\"data-v-429f3e6f\",\"scoped\":true,\"hasInlineConfig\":true}!../../../../node_modules/vue-loader/lib/selector.js?type=styles&index=0!./AgentPage.vue");
+     if(typeof newContent === 'string') newContent = [[module.id, newContent, '']];
+     update(newContent);
+   });
+ }
+ // When the module is disposed, remove the <style> tags
+ module.hot.dispose(function() { update(); });
+}
 
 /***/ })
 /******/ ]);

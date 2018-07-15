@@ -24,6 +24,7 @@ import VuetifyClipboard from 'vuetify-clipboard-input';
 Vue.use(VuetifyClipboard);
 
 Vue.component('supervisor-page', require('./components/SupervisorPage.vue'));
+Vue.component('agent-page', require('./components/AgentPage.vue'));
 
 new Vue({
     el: '#app'
