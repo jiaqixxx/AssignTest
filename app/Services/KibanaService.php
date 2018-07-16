@@ -19,7 +19,7 @@ use Illuminate\Support\Facades\Log;
 class KibanaService
 {
 
-    public function getTestData(Carbon $from, Carbon $to)
+    public function syncTestData(Carbon $from, Carbon $to)
     {
         $data = RestApiClientFactory::kibana()->getTestData($from, $to);
 

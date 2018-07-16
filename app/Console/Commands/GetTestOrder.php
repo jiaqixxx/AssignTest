@@ -53,6 +53,6 @@ class GetTestOrder extends Command
             $to = Carbon::parse( $this->option('to'),new \DateTimeZone('Australia/Sydney'))->endOfDay();
         }
         $service = new KibanaService();
-        $service->getTestData($from,$to);
+        $service->syncTestData($from,$to);
     }
 }
