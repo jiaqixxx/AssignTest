@@ -26,6 +26,8 @@ use Illuminate\Database\Eloquent\Model;
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Order whereUpdatedAt($value)
  * @property string|null $remote_order_created_date
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Order whereRemoteOrderCreatedDate($value)
+ * @property string|null $payment_method
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Order wherePaymentMethod($value)
  */
 class Order extends Model
 {
@@ -34,7 +36,8 @@ class Order extends Model
     protected $casts = [
         'order_items' => 'array',
         'customer_details' => 'array',
-        'environment' => 'array'
+        'environment' => 'array',
+        'product_look_up' => 'array'
     ];
-    
+
 }

@@ -11,17 +11,10 @@ class DatabaseSeeder extends Seeder
      */
     public function run()
     {
-        // $this->call(UsersTableSeeder::class);
 
-//        $order = new \App\Order([
-//            'order_items' => '',
-//            'environment' => '',
-//            'product_look_up' => '',
-//            'customer_details' => '',
-//        ]);
-//
-//        $order->save();
-
+        Eloquent::unguard();
+        $this->call(CustomerTableSeeder::class);
+        $this->call(AddressBookSeeder::class);
         $user1 = new \App\User([
             'email' => 'test@gmail.com',
             'password' => bcrypt('123123'),
