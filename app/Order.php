@@ -36,9 +36,5 @@ class Order extends Model
         'customer_details' => 'array',
         'environment' => 'array'
     ];
-
-    public static function checkOrderIfExistsByRemoteOrderId($remoteOrderId)
-    {
-        return Order::where('remote_order_id', $remoteOrderId)->exists();
-    }
+    
 }
