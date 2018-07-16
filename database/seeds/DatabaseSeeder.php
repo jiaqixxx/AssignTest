@@ -36,14 +36,14 @@ class DatabaseSeeder extends Seeder
         ]);
         $user2->save();
 
-        $assignment = new \App\Assignment([
-            'order_id' => $order->id,
-            'assignee_id' => $user1->id,
-            'has_comments' => false,
-            'assigned_by' => $user2->id,
-            'is_all_good' => false,
-            'is_approved' => false
-        ]);
-        $assignment->save();
+//        $assignment = new \App\Assignment([
+//            'order_id' => $order->id,
+//            'assignee_id' => $user1->id,
+//            'has_comments' => false,
+//            'assigned_by' => $user2->id,
+//            'is_all_good' => false,
+//            'is_approved' => false
+//        ]);
+//        $assignment->save();
     }
 }

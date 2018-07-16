@@ -6,7 +6,7 @@
  * Time: 1:14 PM
  */
 
-namespace App\Http\ApiClient;
+namespace App\Services\ApiClient;
 
 use Illuminate\Support\Facades\Log;
 use GuzzleHttp\Client;

@@ -6,8 +6,9 @@
  * Time: 1:14 PM
  */
 
-namespace App\Http\ApiClient;
+namespace App\Services\ApiClient;
 
+use App\Order;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Log;
 
@@ -67,7 +68,6 @@ class KibanaRestApiClient extends RestApiClient
 
             }
         }
-
         return $testData;
     }
 }

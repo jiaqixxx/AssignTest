@@ -15,10 +15,12 @@ class CreateOrdersTable extends Migration
     {
         Schema::create('orders', function (Blueprint $table) {
             $table->increments('id');
-            $table->string('order_items');
-            $table->string('environment');
-            $table->string('product_look_up');
-            $table->string('customer_details');
+            $table->integer('remote_order_id')->nullable();
+            $table->dateTime('remote_order_created_date')->nullable();
+            $table->string('order_items')->nullable();
+            $table->string('environment')->nullable();
+            $table->string('product_look_up')->nullable();
+            $table->string('customer_details')->nullable();
             $table->timestamps();
         });
     }
