@@ -33,8 +33,9 @@ class KibanaRestApiClient extends RestApiClient
      */
     public function getRawData(Carbon $fromCarbon, Carbon $toCaron)
     {
-        $from = $fromCarbon->timestamp * 1000;
-        $to = $toCaron->timestamp * 1000;
+        $from = $fromCarbon->timestamp * 1000; // ms
+        $to = $toCaron->timestamp * 1000; // ms
+
         return $this->postWithBody('_msearch', '{"index":["inkstation-*"],"ignore_unavailable":true,"preference":1531465019044}
 {"version":true,"size":500,"sort":[{"@timestamp":{"order":"desc","unmapped_type":"boolean"}}],"_source":{"excludes":[]},"aggs":{"2":{"date_histogram":{"field":"@timestamp","interval":"1m","time_zone":"Australia/Sydney","min_doc_count":1}}},"stored_fields":["*"],"script_fields":{},"docvalue_fields":["@timestamp"],"query":{"bool":{"must":[{"match_all":{}},{"match_phrase":{"source":{"query":"order-summary"}}},{"range":{"@timestamp":{"gte":' . $from . ',"lte":' . $to . ',"format":"epoch_millis"}}}],"filter":[],"should":[],"must_not":[]}},"highlight":{"pre_tags":["@kibana-highlighted-field@"],"post_tags":["@/kibana-highlighted-field@"],"fields":{"*":{}},"fragment_size":2147483647}}
 ');
