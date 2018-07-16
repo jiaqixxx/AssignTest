@@ -13,14 +13,14 @@ class DatabaseSeeder extends Seeder
     {
         // $this->call(UsersTableSeeder::class);
 
-        $order = new \App\Order([
-            'order_items' => '',
-            'environment' => '',
-            'product_look_up' => '',
-            'customer_details' => '',
-        ]);
-
-        $order->save();
+//        $order = new \App\Order([
+//            'order_items' => '',
+//            'environment' => '',
+//            'product_look_up' => '',
+//            'customer_details' => '',
+//        ]);
+//
+//        $order->save();
 
         $user1 = new \App\User([
             'email' => 'test@gmail.com',

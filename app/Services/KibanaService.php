@@ -28,21 +28,38 @@ class KibanaService
             foreach ($data as $row) {
                 $orderId = isset($row['order_id']) ? $row['order_id'] : null;
                 if ($orderId) {
-                    if (!Order::checkOrderIfExistsByRemoteOrderId($orderId)) {
-                        $env = [
-                            'device' => ['type' => 'mobile/desktop'],
-                            'core' => isset($row['ua']) ? $row['ua'] : ''
-                        ];
-                        $orderId = isset($row['order_id']) ? $row['order_id'] : null;
-                        $orderItems = isset($row['items']) ? $row['items'] : null;
 
+                    $order = Order::where('remote_order_id', $orderId)->first();
+
+                    if (!$order) {
                         $order = new Order();
-                        $order->remote_order_id = $orderId;
-                        $order->order_items = $orderItems;
-                        $order->environment = $env;
-                        $order->remote_order_created_date = isset($row['@timestamp']) ? $row['@timestamp'] : null;
-                        $order->save();
                     }
+
+                    $env = [
+                        'device' => ['type' => 'mobile/desktop'],
+                        'core' => isset($row['ua']) ? $row['ua'] : ''
+                    ];
+                    $orderId = isset($row['order_id']) ? $row['order_id'] : null;
+                    $orderItems = isset($row['items']) ? $row['items'] : null;
+
+                    $customerDetails = [
+                        'first_name' => 'Ryan',
+                        'last_name' => 'Deng',
+                        'company' => 'Fantasy World',
+                        'suburb' => 'Fairy Tail',
+                        'address1' => 'Hero School',
+                        'address2' => '',
+                        'postcode' => '8888',
+                        'phone' => '22222'
+                    ];
+
+                    $order->customer_details = $customerDetails;
+                    $order->remote_order_id = $orderId;
+                    $order->order_items = $orderItems;
+                    $order->environment = $env;
+                    $order->remote_order_created_date = isset($row['@timestamp']) ? $row['@timestamp'] : null;
+                    $order->save();
+
                 }
             }
             DB::commit();
