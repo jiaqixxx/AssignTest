@@ -17,7 +17,6 @@ class CreateCommentsTable extends Migration
             $table->increments('id');
             $table->integer('assignment_id');
             $table->text('comment');
-            $table->string('uploaded_file');
             $table->timestamps();
         });
     }

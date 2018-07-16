@@ -63,8 +63,10 @@ class AssignmentController extends Controller
             ->select('orders.order_items', 'orders.customer_details', 'orders.environment', 'orders.product_look_up', 'assignments.*', 'users.name')
             ->get();
         foreach($assignments as $index=>$assignment){
+            $assignments[$index]['environment'] = json_decode($assignment['environment']);
             $assignments[$index]['order_items'] = json_decode($assignment['order_items']);
             $assignments[$index]['customer_details'] = json_decode($assignment['customer_details']);
+            $assignments[$index]['product_look_up'] = json_decode($assignment['product_look_up']);
         }
         return $assignments;
     }
@@ -100,13 +102,16 @@ class AssignmentController extends Controller
             ->get();
 
         foreach($assignments as $index=>$assignment){
+            $assignments[$index]['environment'] = json_decode($assignment['environment']);
             $assignments[$index]['order_items'] = json_decode($assignment['order_items']);
             $assignments[$index]['customer_details'] = json_decode($assignment['customer_details']);
+            $assignments[$index]['product_look_up'] = json_decode($assignment['product_look_up']);
         }
         return $assignments;
     }
 
-    public function getAgentAssignments(){
+    public function getAgentAssignments()
+    {
         $agentId = Auth::user()->id;
         $assignments = Assignment::leftJoin('users', 'assignments.assignee_id', '=', 'users.id')
             ->leftJoin('orders', 'assignments.order_id', '=', 'orders.id')
@@ -115,10 +120,23 @@ class AssignmentController extends Controller
             ->select('orders.order_items', 'orders.customer_details', 'orders.environment', 'orders.product_look_up', 'assignments.*', 'users.name')
             ->get();
         foreach($assignments as $index=>$assignment){
+            $assignments[$index]['environment'] = json_decode($assignment['environment']);
             $assignments[$index]['order_items'] = json_decode($assignment['order_items']);
             $assignments[$index]['customer_details'] = json_decode($assignment['customer_details']);
+            $assignments[$index]['product_look_up'] = json_decode($assignment['product_look_up']);
         }
         return $assignments;
+    }
 
+    public function setAllGood(Request $request)
+    {
+        $assignmentId = $request->input('assignmentId');
+        $result = Assignment::where('id', '=', $assignmentId)
+            ->update(['is_all_good' => 1]);
+        if(!$result){
+            echo json_encode(['result' => 'Failed', 'message' => 'Failed to set assignment to all good']);
+        }else{
+            echo $result;
+        }
     }
 }

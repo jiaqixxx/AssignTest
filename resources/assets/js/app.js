@@ -14,9 +14,12 @@ require('./bootstrap');
 import Vue from 'vue';
 import Vuetify from 'vuetify';
 import axios from 'axios';
+import Notifications from 'vue-notification'
+
 export const EventBus = new Vue();
 
 Vue.use(Vuetify);
+Vue.use(Notifications);
 window.axios = axios;
 
 import VuetifyClipboard from 'vuetify-clipboard-input';

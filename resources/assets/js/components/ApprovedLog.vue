@@ -1,26 +1,45 @@
 <template>
     <div>
-        <v-dialog v-model="dialog" max-width="700px">
+        <notifications group="commentsSave" position="top center"/>
+        <v-dialog v-model="dialog" max-width="900px">
             <v-card>
                 <v-card-title>
                     <span class="headline">Comments/Bugs</span>
                 </v-card-title>
                 <v-card-text>
-                    <v-data-table
-                            :items="comments"
-                            class="elevation-1"
-                            hide-actions
-                            :headers="commentsHeader"
+                    <vue-editor
+                            v-model="comments"
                     >
-                        <template slot="items" slot-scope="props">
-                            <td class="text-xs-left">{{ props.item.comment }}</td>
-                            <td class="text-xs-left"><a href="props.item.uploaded_file" target="_blank">Check File</a></td>
-                        </template>
-                    </v-data-table>
+                    </vue-editor>
                 </v-card-text>
                 <v-divider></v-divider>
                 <v-card-actions>
                     <v-btn color="blue darken-1" flat @click.native="dialog = false">Close</v-btn>
+                </v-card-actions>
+            </v-card>
+        </v-dialog>
+        <v-dialog v-model="dialogCustomerDetails" max-width="700px">
+            <v-card>
+                <v-card-title>
+                    <span class="headline">Customer Details</span>
+                </v-card-title>
+                <v-card-text>
+                    <div v-for="(value, key, index) in customerDetailsPopUp">
+                        <v-text-field
+                                readonly
+                                ref="input"
+                                class="key"
+                                :label="key"
+                                v-model="customerDetailsPopUp[key]"
+                                append-icon='content_copy'
+                                @click:append='copy(index)'
+                        >
+                        </v-text-field>
+                    </div>
+                </v-card-text>
+                <v-divider></v-divider>
+                <v-card-actions>
+                    <v-btn color="blue darken-1" flat @click.native="dialogCustomerDetails = false">Close</v-btn>
                 </v-card-actions>
             </v-card>
         </v-dialog>
@@ -76,44 +95,29 @@
             <template slot="items" slot-scope="props">
                 <td class="text-xs-left">{{ props.item.id }}</td>
                 <td class="text-xs-left">{{ props.item.name }}</td>
-                <td class="text-xs-left">{{ props.item.environment }}</td>
+                <td class="text-xs-left">
+                    <p v-for="environment in props.item.environment" style="margin-bottom: 0;">
+                        {{ environment }}
+                    </p>
+                </td>
                 <td class="text-xs-left">
                     <p style="margin-bottom: 0;">
                         {{ props.item.order_id }}
                     </p>
                     <b style="margin-bottom: 0">Items: </b>
-                    <p v-for="item in props.item.order_items" style="margin-bottom: 0;">
-                        {{ item }}
+                    <div v-for="item in props.item.order_items">
+                        <p v-for="(value, key) in item" style="margin-bottom: 0;">
+                            {{ key }}: {{ value }}
+                        </p>
+                    </div>
+                </td>
+                <td class="text-xs-left">
+                    <p v-for="product_look_up in props.item.product_look_up" style="margin-bottom: 0;">
+                        {{ product_look_up }}
                     </p>
                 </td>
-                <td class="text-xs-left">{{ props.item.product_look_up }}</td>
                 <td class="text-xs-left">
                     <v-btn @click="checkCustomerDetails(props.item)">View Customer Details</v-btn>
-                    <v-dialog v-model="dialogCustomerDetails" max-width="700px">
-                        <v-card>
-                            <v-card-title>
-                                <span class="headline">Customer Details</span>
-                            </v-card-title>
-                            <v-card-text>
-                                <div v-for="(value, key, index) in props.item.customer_details">
-                                    <v-text-field
-                                            readonly
-                                            ref="input"
-                                            class="key"
-                                            :label="key"
-                                            v-model="customerDetailsPopUp[key]"
-                                            append-icon='content_copy'
-                                            @click:append='copy(index)'
-                                    >
-                                    </v-text-field>
-                                </div>
-                            </v-card-text>
-                            <v-divider></v-divider>
-                            <v-card-actions>
-                                <v-btn color="blue darken-1" flat @click.native="dialogCustomerDetails = false">Close</v-btn>
-                            </v-card-actions>
-                        </v-card>
-                    </v-dialog>
                 </td>
                 <td class="text-xs-center">
                     <b v-if="props.item.is_all_good=='1'" style="color: mediumseagreen">All Good</b>
@@ -141,7 +145,7 @@
 
 <script>
     import {EventBus} from "../app";
-
+    import { VueEditor } from "vue2-editor";
     export default {
         data () {
             return {
@@ -150,11 +154,7 @@
                     totalItems: 0
                 },
                 dialog: false,
-                commentsHeader: [
-                    {text: 'Comment', align: 'left', value: 'comment'},
-                    {text: 'Uploaded File', align: 'left', value: 'uploaded_file'},
-                ],
-                comments: [],
+                comments: '',
                 dialogCustomerDetails: false,
                 customerDetailsPopUp: [],
                 checkbox: true,
@@ -171,7 +171,7 @@
                 approvedLogsHeader: [
                     {text: 'ID', align: 'left', value: 'id'},
                     {text: 'Assigned Agent', align: 'left', value: 'name'},
-                    {text: 'Environment', align: 'left', value: 'environment'},
+                    {text: 'Environment', align: 'left', value: 'environment', width: 15},
                     {text: 'Order Number', align: 'left', value: 'order_items'},
                     {text: 'Product_look_up', align: 'left', value: 'product_look_up'},
                     {text: 'Customer Detail', align: 'left', value: 'customer_details'},
@@ -180,6 +180,9 @@
                 ]
             }
         },
+        components: {
+            VueEditor
+        },
         created () {
             EventBus.$on('approveAssignment', this.initialize);
             this.initialize();
@@ -187,7 +190,7 @@
         methods: {
             initialize(){
                 let app = this;
-                axios.get('api/assignments/1')
+                axios.get('assignments/1')
                     .then(function (response) {
                         app.approvedLogs = response.data;
                         app.pagination.totalItems = response.data.length;
@@ -199,9 +202,9 @@
             getComments(item){
                 var assignmentId = item.id;
                 let app = this;
-                axios.get('api/comments/' + assignmentId)
+                axios.get('comments/' + assignmentId)
                     .then(function (response) {
-                        app.comments = response.data;
+                        app.comments = response.data[0]['comment'];
                         app.dialog = true;
                     })
                     .catch(function (error) {
@@ -215,7 +218,7 @@
                     const params = new URLSearchParams();
                     params.append('status', '0');
                     params.append('assignment_id', assignmentId);
-                    axios.post('api/assignments', params)
+                    axios.put('assignments', params)
                         .then(function (response) {
                             if (response.data.result == 'Failed') {
                                 alert(response.data.message);
@@ -236,7 +239,7 @@
                     const params = new URLSearchParams();
                     params.append('status', '1');
                     params.append('assignment_id', assignmentId);
-                    axios.post('api/assignments', params)
+                    axios.put('assignments', params)
                         .then(function (response) {
                             if (response.data.result == 'Failed') {
                                 alert(response.data.message);
@@ -251,8 +254,19 @@
                 }
             },
             checkCustomerDetails(item){
-                this.customerDetailsPopUp = item.customer_details;
-                this.dialogCustomerDetails = true;
+                this.dialogCustomerDetails = false;
+                if(item.customer_details == null){
+                    this.$notify({
+                        group: 'commentsSave',
+                        text: 'Customer Details is not available',
+                        duration: 5000,
+                        type: 'warn'
+                    });
+                    return false;
+                }else{
+                    this.customerDetailsPopUp = item.customer_details;
+                    this.dialogCustomerDetails = true;
+                }
             },
             search(){
                 var id = this.orderId;
@@ -264,7 +278,7 @@
                     return false;
                 }
                 let app = this;
-                axios.get('api/search',{
+                axios.get('search',{
                     params:{
                         id: id,
                         order_id: orderNum,

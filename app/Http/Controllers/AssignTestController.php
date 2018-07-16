@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers;
 
-use App\Comment;
 use App\User;
 use App\Orders;
 use App\Assignment;
@@ -34,7 +33,6 @@ class AssignTestController extends Controller
             'agentId' => 'required|integer',
             'numAssignments' => 'integer|required'
         ];
-
 
         $validator = Validator::make($request->all(), $rules);
         $agentId = $request->input('agentId');
@@ -69,13 +67,4 @@ class AssignTestController extends Controller
             }
         }
     }
-
-    public function getComments($assignmentId)
-    {
-        $comments = Comment::select('comment', 'uploaded_file')
-            ->where('assignment_id', '=', $assignmentId)
-            ->get();
-        return $comments;
-    }
-
 }
