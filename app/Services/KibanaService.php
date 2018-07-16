@@ -42,6 +42,7 @@ class KibanaService
                     $orderId = isset($row['order_id']) ? $row['order_id'] : null;
                     $orderItems = isset($row['items']) ? $row['items'] : null;
 
+                    $paymentMethod = isset($row['payment_method']) ? $row['payment_method'] : null;
                     $customerDetails = [
                         'first_name' => 'Ryan',
                         'last_name' => 'Deng',
@@ -57,6 +58,7 @@ class KibanaService
                     $order->remote_order_id = $orderId;
                     $order->order_items = $orderItems;
                     $order->environment = $env;
+                    $order->payment_method = $paymentMethod;
                     $order->remote_order_created_date = isset($row['@timestamp']) ? $row['@timestamp'] : null;
                     $order->save();
 

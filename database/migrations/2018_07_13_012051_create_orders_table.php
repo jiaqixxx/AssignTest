@@ -17,6 +17,7 @@ class CreateOrdersTable extends Migration
             $table->increments('id');
             $table->integer('remote_order_id')->nullable();
             $table->dateTime('remote_order_created_date')->nullable();
+            $table->string('payment_method')->nullable();
             $table->string('order_items')->nullable();
             $table->string('environment')->nullable();
             $table->string('product_look_up')->nullable();
