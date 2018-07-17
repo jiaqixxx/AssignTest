@@ -55,12 +55,18 @@ class AssignmentController extends Controller
         }
     }
 
-    public function getAssignmentsWithStatus($status)
+    public function getAssignmentsWithStatus(Request $request)
     {
+        $page = $request->input('page');
+        $status = $request->input('status');
+        $offset = ($page - 1)*3;
+        $countAssignments = Assignment::where('is_approved', '=', $status)->count();
         $assignments = Assignment::leftJoin('users', 'assignments.assignee_id', '=', 'users.id')
             ->leftJoin('orders', 'assignments.order_id', '=', 'orders.id')
             ->where('is_approved', '=', $status)
             ->select('orders.order_items', 'orders.customer_details', 'orders.environment', 'orders.product_look_up', 'assignments.*', 'users.name')
+            ->offset($offset)
+            ->limit(3)
             ->get();
         foreach($assignments as $index=>$assignment){
             $assignments[$index]['environment'] = json_decode($assignment['environment']);
@@ -68,7 +74,7 @@ class AssignmentController extends Controller
             $assignments[$index]['customer_details'] = json_decode($assignment['customer_details']);
             $assignments[$index]['product_look_up'] = json_decode($assignment['product_look_up']);
         }
-        return $assignments;
+        return json_encode(['count' => $countAssignments, 'assignments' => $assignments]);
     }
 
     public function searchAssignment(Request $request)
@@ -98,26 +104,35 @@ class AssignmentController extends Controller
         if ($request->input('bugs') !== null){
             $assignments->where('assignments.has_comments', '=', $request->input('bugs'));
         }
+        $countAssignments = $assignments->count();
+        $page = $request->input('page');
+        $offset = ($page-1)*3;
         $assignments = $assignments->select('users.id', 'users.name', 'orders.*', 'assignments.*')
+            ->offset($offset)
+            ->limit(3)
             ->get();
-
         foreach($assignments as $index=>$assignment){
             $assignments[$index]['environment'] = json_decode($assignment['environment']);
             $assignments[$index]['order_items'] = json_decode($assignment['order_items']);
             $assignments[$index]['customer_details'] = json_decode($assignment['customer_details']);
             $assignments[$index]['product_look_up'] = json_decode($assignment['product_look_up']);
         }
-        return $assignments;
+        return json_encode(['count' => $countAssignments, 'assignments' => $assignments]);
     }
 
-    public function getAgentAssignments()
+    public function getAgentAssignments(Request $request)
     {
+        $page = $request->input('page');
+        $offset = ($page - 1) * 6;
         $agentId = Auth::user()->id;
+        $countAssignments = Assignment::where('assignee_id', '=', $agentId)->where('is_approved', '=', 0)->count();
         $assignments = Assignment::leftJoin('users', 'assignments.assignee_id', '=', 'users.id')
             ->leftJoin('orders', 'assignments.order_id', '=', 'orders.id')
             ->where('is_approved', '=', 0)
             ->where('assignee_id', $agentId)
             ->select('orders.order_items', 'orders.customer_details', 'orders.environment', 'orders.product_look_up', 'assignments.*', 'users.name')
+            ->offset($offset)
+            ->limit(6)
             ->get();
         foreach($assignments as $index=>$assignment){
             $assignments[$index]['environment'] = json_decode($assignment['environment']);
@@ -125,7 +140,7 @@ class AssignmentController extends Controller
             $assignments[$index]['customer_details'] = json_decode($assignment['customer_details']);
             $assignments[$index]['product_look_up'] = json_decode($assignment['product_look_up']);
         }
-        return $assignments;
+        return json_encode(['count' => $countAssignments, 'assignments' => $assignments]);
     }
 
     public function setAllGood(Request $request)

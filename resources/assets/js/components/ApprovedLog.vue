@@ -52,27 +52,35 @@
             <v-flex xs10 offset-xs1>
                 <v-layout row>
                     <v-flex xs2>
-                        <v-text-field style="width:100px"
-                                      v-model="orderId"
-                                      label="ID"
+                        <v-text-field
+                                style="width:100px"
+                                v-model="id"
+                                v-bind:value="searchId"
+                                label="ID"
                         ></v-text-field>
                     </v-flex>
                     <v-flex xs2>
-                        <v-text-field style="width:150px"
-                                      v-model="orderNum"
-                                      label="Order Number"
+                        <v-text-field
+                                style="width:150px"
+                                v-model="orderNum"
+                                v-bind:value="searchOrderNum"
+                                label="Order Number"
                         ></v-text-field>
                     </v-flex>
                     <v-flex xs2>
-                        <v-text-field style="width:180px"
-                                      v-model="customerDetails"
-                                      label="Customer Details"
+                        <v-text-field
+                                style="width:180px"
+                                v-model="customerDetails"
+                                v-bind:value="searchCus"
+                                label="Customer Details"
                         ></v-text-field>
                     </v-flex>
                     <v-flex xs2>
                         <div style="display: inline-block; margin-top: 15px"><p>Bugs?</p></div>
                         <v-select style="width: 150px; float: right"
+                                  id="filterBug"
                                   v-model="filterBug"
+                                  v-bind:value="searchBugs"
                                   :items="bugs"
                                   item-text="text"
                                   item-value="value"
@@ -90,7 +98,6 @@
                 class="elevation-1"
                 hide-actions
                 :headers="approvedLogsHeader"
-                :pagination.sync="pagination"
         >
             <template slot="items" slot-scope="props">
                 <td class="text-xs-left">{{ props.item.id }}</td>
@@ -138,6 +145,8 @@
             <v-pagination
                     v-model="pagination.page"
                     :length="pages"
+                    :total-visible="7"
+                    @input="next"
             ></v-pagination>
         </div>
     </div>
@@ -149,7 +158,12 @@
     export default {
         data () {
             return {
+                searchId: '',
+                searchOrderNum: '',
+                searchCus: '',
+                searchBugs: '',
                 pagination: {
+                    page: 1,
                     rowsPerPage: 3,
                     totalItems: 0
                 },
@@ -158,9 +172,9 @@
                 dialogCustomerDetails: false,
                 customerDetailsPopUp: [],
                 checkbox: true,
-                orderId: [],
-                orderNum: [],
-                customerDetails: [],
+                id: '',
+                orderNum: '',
+                customerDetails: '',
                 bugs: [
                     {text: '', value: ''},
                     {text: 'No', value: '0'},
@@ -190,10 +204,15 @@
         methods: {
             initialize(){
                 let app = this;
-                axios.get('assignments/1')
+                axios.get('assignments/status', {
+                    params: {
+                        status: 1,
+                        page: 1
+                    }
+                })
                     .then(function (response) {
-                        app.approvedLogs = response.data;
-                        app.pagination.totalItems = response.data.length;
+                        app.approvedLogs = response.data.assignments;
+                        app.pagination.totalItems = response.data.count;
                     })
                     .catch(function (error) {
                         console.log(error);
@@ -221,8 +240,19 @@
                     axios.put('assignments', params)
                         .then(function (response) {
                             if (response.data.result == 'Failed') {
-                                alert(response.data.message);
+                                app.$notify({
+                                    group: 'approveAssignment',
+                                    text: response.data.message,
+                                    duration: 5000,
+                                    type: 'warn'
+                                });
                             } else {
+                                app.$notify({
+                                    group: 'approveAssignment',
+                                    text: 'Assignment un-approved',
+                                    duration: 5000,
+                                    type: 'success'
+                                });
                                 app.initialize();
                                 EventBus.$emit('unSetAssignment');
                             }
@@ -242,8 +272,19 @@
                     axios.put('assignments', params)
                         .then(function (response) {
                             if (response.data.result == 'Failed') {
-                                alert(response.data.message);
+                                app.$notify({
+                                    group: 'approveAssignment',
+                                    text: response.data.message,
+                                    duration: 5000,
+                                    type: 'warn'
+                                });
                             } else {
+                                app.$notify({
+                                    group: 'approveAssignment',
+                                    text: 'Assignment approved',
+                                    duration: 5000,
+                                    type: 'success'
+                                });
                                 app.initialize();
                                 EventBus.$emit('updateInProgress');
                             }
@@ -269,30 +310,31 @@
                 }
             },
             search(){
-                var id = this.orderId;
+                var id = this.id;
                 var orderNum = this.orderNum;
                 var customerDetails = this.customerDetails;
                 var bugs = this.filterBug;
+                this.searchId = id;
+                this.searchOrderNum = orderNum;
+                this.searchCus = customerDetails;
+                this.searchBugs = bugs;
                 if(id == '' && orderNum == '' && customerDetails == '' && bugs == ''){
                     this.initialize();
                     return false;
                 }
                 let app = this;
-                axios.get('search',{
+                axios.get('assignments/search',{
                     params:{
                         id: id,
                         order_id: orderNum,
                         customer_details: customerDetails,
-                        bugs: bugs
+                        bugs: bugs,
+                        page: 1
                     }
                 })
                     .then(function (response) {
-                        if(response.data.result == 'Failed'){
-                            alert(response.data.message);
-                            return false;
-                        }
-                        app.approvedLogs = response.data;
-                        app.pagination.totalItems = response.data.length;
+                        app.approvedLogs = response.data.assignments;
+                        app.pagination.totalItems = response.data.count;
                     })
                     .catch(function (error) {
                         console.log(error);
@@ -304,6 +346,44 @@
                 document.execCommand('selectAll');
                 this.copied = document.execCommand('copy');
             },
+            next(page){
+                let app = this;
+                var searchId = this.searchId;
+                var searchOrderNum = this.searchOrderNum;
+                var searchCus = this.searchCus;
+                var searchBugs = this.searchBugs;
+                if(searchId == '' && searchOrderNum == '' && searchCus == '' && searchBugs == ''){
+                    axios.get('assignments/status', {
+                        params: {
+                            status: 1,
+                            page: page
+                        }
+                    })
+                        .then(function (response) {
+                            app.approvedLogs = response.data.assignments;
+                        })
+                        .catch(function (error) {
+                            console.log(error);
+                        });
+                }else{
+                    axios.get('assignments/search',{
+                        params:{
+                            id: searchId,
+                            order_id: searchOrderNum,
+                            customer_details: searchCus,
+                            bugs: searchBugs,
+                            page: page
+                        }
+                    })
+                        .then(function (response) {
+                            app.approvedLogs = response.data.assignments;
+                            app.pagination.totalItems = response.data.count;
+                        })
+                        .catch(function (error) {
+                            console.log(error);
+                        });
+                }
+            }
         },
         computed: {
             pages () {

@@ -13357,13 +13357,27 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 //
 //
 //
+//
+//
+//
+//
+//
+//
+//
+//
+//
 
 
 
 /* harmony default export */ __webpack_exports__["default"] = ({
     data: function data() {
         return {
+            searchId: '',
+            searchOrderNum: '',
+            searchCus: '',
+            searchBugs: '',
             pagination: {
+                page: 1,
                 rowsPerPage: 3,
                 totalItems: 0
             },
@@ -13372,9 +13386,9 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
             dialogCustomerDetails: false,
             customerDetailsPopUp: [],
             checkbox: true,
-            orderId: [],
-            orderNum: [],
-            customerDetails: [],
+            id: '',
+            orderNum: '',
+            customerDetails: '',
             bugs: [{ text: '', value: '' }, { text: 'No', value: '0' }, { text: 'Yes', value: '1' }],
             filterBug: '',
             approvedLogs: [],
@@ -13393,9 +13407,14 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
     methods: {
         initialize: function initialize() {
             var app = this;
-            axios.get('assignments/1').then(function (response) {
-                app.approvedLogs = response.data;
-                app.pagination.totalItems = response.data.length;
+            axios.get('assignments/status', {
+                params: {
+                    status: 1,
+                    page: 1
+                }
+            }).then(function (response) {
+                app.approvedLogs = response.data.assignments;
+                app.pagination.totalItems = response.data.count;
             }).catch(function (error) {
                 console.log(error);
             });
@@ -13419,8 +13438,19 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
                 params.append('assignment_id', assignmentId);
                 axios.put('assignments', params).then(function (response) {
                     if (response.data.result == 'Failed') {
-                        alert(response.data.message);
+                        app.$notify({
+                            group: 'approveAssignment',
+                            text: response.data.message,
+                            duration: 5000,
+                            type: 'warn'
+                        });
                     } else {
+                        app.$notify({
+                            group: 'approveAssignment',
+                            text: 'Assignment un-approved',
+                            duration: 5000,
+                            type: 'success'
+                        });
                         app.initialize();
                         __WEBPACK_IMPORTED_MODULE_0__app__["EventBus"].$emit('unSetAssignment');
                     }
@@ -13438,8 +13468,19 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
                 params.append('assignment_id', assignmentId);
                 axios.put('assignments', params).then(function (response) {
                     if (response.data.result == 'Failed') {
-                        alert(response.data.message);
+                        app.$notify({
+                            group: 'approveAssignment',
+                            text: response.data.message,
+                            duration: 5000,
+                            type: 'warn'
+                        });
                     } else {
+                        app.$notify({
+                            group: 'approveAssignment',
+                            text: 'Assignment approved',
+                            duration: 5000,
+                            type: 'success'
+                        });
                         app.initialize();
                         __WEBPACK_IMPORTED_MODULE_0__app__["EventBus"].$emit('updateInProgress');
                     }
@@ -13464,29 +13505,30 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
             }
         },
         search: function search() {
-            var id = this.orderId;
+            var id = this.id;
             var orderNum = this.orderNum;
             var customerDetails = this.customerDetails;
             var bugs = this.filterBug;
+            this.searchId = id;
+            this.searchOrderNum = orderNum;
+            this.searchCus = customerDetails;
+            this.searchBugs = bugs;
             if (id == '' && orderNum == '' && customerDetails == '' && bugs == '') {
                 this.initialize();
                 return false;
             }
             var app = this;
-            axios.get('search', {
+            axios.get('assignments/search', {
                 params: {
                     id: id,
                     order_id: orderNum,
                     customer_details: customerDetails,
-                    bugs: bugs
+                    bugs: bugs,
+                    page: 1
                 }
             }).then(function (response) {
-                if (response.data.result == 'Failed') {
-                    alert(response.data.message);
-                    return false;
-                }
-                app.approvedLogs = response.data;
-                app.pagination.totalItems = response.data.length;
+                app.approvedLogs = response.data.assignments;
+                app.pagination.totalItems = response.data.count;
             }).catch(function (error) {
                 console.log(error);
             });
@@ -13496,6 +13538,40 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
             input.focus();
             document.execCommand('selectAll');
             this.copied = document.execCommand('copy');
+        },
+        next: function next(page) {
+            var app = this;
+            var searchId = this.searchId;
+            var searchOrderNum = this.searchOrderNum;
+            var searchCus = this.searchCus;
+            var searchBugs = this.searchBugs;
+            if (searchId == '' && searchOrderNum == '' && searchCus == '' && searchBugs == '') {
+                axios.get('assignments/status', {
+                    params: {
+                        status: 1,
+                        page: page
+                    }
+                }).then(function (response) {
+                    app.approvedLogs = response.data.assignments;
+                }).catch(function (error) {
+                    console.log(error);
+                });
+            } else {
+                axios.get('assignments/search', {
+                    params: {
+                        id: searchId,
+                        order_id: searchOrderNum,
+                        customer_details: searchCus,
+                        bugs: searchBugs,
+                        page: page
+                    }
+                }).then(function (response) {
+                    app.approvedLogs = response.data.assignments;
+                    app.pagination.totalItems = response.data.count;
+                }).catch(function (error) {
+                    console.log(error);
+                });
+            }
         }
     },
     computed: {
@@ -13726,6 +13802,7 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 //
 //
 //
+//
 
 
 
@@ -13733,6 +13810,7 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
     data: function data() {
         return {
             pagination: {
+                page: 1,
                 rowsPerPage: 3,
                 totalItems: 0
             },
@@ -13756,9 +13834,14 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
     methods: {
         initialize: function initialize() {
             var app = this;
-            axios.get('assignments/0').then(function (response) {
-                app.assignmentsAssigned = response.data;
-                app.pagination.totalItems = response.data.length;
+            axios.get('assignments/status', {
+                params: {
+                    status: 0,
+                    page: 1
+                }
+            }).then(function (response) {
+                app.assignmentsAssigned = response.data.assignments;
+                app.pagination.totalItems = response.data.count;
             }).catch(function (error) {
                 console.log(error);
             });
@@ -13773,7 +13856,8 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
                 console.log(error);
             });
         },
-        approveAssignment: function approveAssignment(item) {
+        approveAssignment: function approveAssignment(item, index) {
+            console.log(index);
             if (confirm('Are you sure to approve this assignment?')) {
                 var assignmentId = item.id;
                 var app = this;
@@ -13782,8 +13866,19 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
                 params.append('assignment_id', assignmentId);
                 axios.put('assignments', params).then(function (response) {
                     if (response.data.result == 'Failed') {
-                        alert(response.data.message);
+                        app.$notify({
+                            group: 'approveAssignment',
+                            text: response.data.message,
+                            duration: 5000,
+                            type: 'warn'
+                        });
                     } else {
+                        app.$notify({
+                            group: 'approveAssignment',
+                            text: 'Assignment approved',
+                            duration: 5000,
+                            type: 'success'
+                        });
                         app.initialize();
                         __WEBPACK_IMPORTED_MODULE_0__app__["EventBus"].$emit('approveAssignment');
                     }
@@ -13812,6 +13907,19 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
             input.focus();
             document.execCommand('selectAll');
             this.copied = document.execCommand('copy');
+        },
+        next: function next(page) {
+            var app = this;
+            axios.get('assignments/status', {
+                params: {
+                    status: 0,
+                    page: page
+                }
+            }).then(function (response) {
+                app.assignmentsAssigned = response.data.assignments;
+            }).catch(function (error) {
+                console.log(error);
+            });
         }
     },
     computed: {
@@ -16390,7 +16498,7 @@ if (typeof jQuery === 'undefined') {
 /***/ (function(module, exports, __webpack_require__) {
 
 exports = module.exports = __webpack_require__(2)();
-exports.push([module.i, "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n", ""]);
+exports.push([module.i, "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n", ""]);
 
 /***/ }),
 /* 42 */
@@ -16418,7 +16526,7 @@ exports.push([module.i, "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\
 /***/ (function(module, exports, __webpack_require__) {
 
 exports = module.exports = __webpack_require__(2)();
-exports.push([module.i, "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n", ""]);
+exports.push([module.i, "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n", ""]);
 
 /***/ }),
 /* 46 */
@@ -44398,7 +44506,7 @@ module.exports = Component.exports
 module.exports={render:function (){var _vm=this;var _h=_vm.$createElement;var _c=_vm._self._c||_h;
   return _c('div', [_c('notifications', {
     attrs: {
-      "group": "commentsSave",
+      "group": "approveAssignment",
       "position": "top center"
     }
   }), _vm._v(" "), _c('v-dialog', {
@@ -44503,13 +44611,7 @@ module.exports={render:function (){var _vm=this;var _h=_vm.$createElement;var _c
     attrs: {
       "items": _vm.assignmentsAssigned,
       "hide-actions": "",
-      "headers": _vm.assignmentAssignedHeader,
-      "pagination": _vm.pagination
-    },
-    on: {
-      "update:pagination": function($event) {
-        _vm.pagination = $event
-      }
+      "headers": _vm.assignmentAssignedHeader
     },
     scopedSlots: _vm._u([{
       key: "items",
@@ -44589,7 +44691,7 @@ module.exports={render:function (){var _vm=this;var _h=_vm.$createElement;var _c
           on: {
             "click": function($event) {
               $event.stopPropagation();
-              _vm.approveAssignment(props.item)
+              _vm.approveAssignment(props.item, props.index)
             }
           },
           model: {
@@ -44606,7 +44708,11 @@ module.exports={render:function (){var _vm=this;var _h=_vm.$createElement;var _c
     staticClass: "text-xs-center pt-2"
   }, [_c('v-pagination', {
     attrs: {
-      "length": _vm.pages
+      "length": _vm.pages,
+      "total-visible": 7
+    },
+    on: {
+      "input": _vm.next
     },
     model: {
       value: (_vm.pagination.page),
@@ -45009,14 +45115,15 @@ module.exports={render:function (){var _vm=this;var _h=_vm.$createElement;var _c
       "width": "100px"
     },
     attrs: {
+      "value": _vm.searchId,
       "label": "ID"
     },
     model: {
-      value: (_vm.orderId),
+      value: (_vm.id),
       callback: function($$v) {
-        _vm.orderId = $$v
+        _vm.id = $$v
       },
-      expression: "orderId"
+      expression: "id"
     }
   })], 1), _vm._v(" "), _c('v-flex', {
     attrs: {
@@ -45027,6 +45134,7 @@ module.exports={render:function (){var _vm=this;var _h=_vm.$createElement;var _c
       "width": "150px"
     },
     attrs: {
+      "value": _vm.searchOrderNum,
       "label": "Order Number"
     },
     model: {
@@ -45045,6 +45153,7 @@ module.exports={render:function (){var _vm=this;var _h=_vm.$createElement;var _c
       "width": "180px"
     },
     attrs: {
+      "value": _vm.searchCus,
       "label": "Customer Details"
     },
     model: {
@@ -45069,6 +45178,8 @@ module.exports={render:function (){var _vm=this;var _h=_vm.$createElement;var _c
       "float": "right"
     },
     attrs: {
+      "id": "filterBug",
+      "value": _vm.searchBugs,
       "items": _vm.bugs,
       "item-text": "text",
       "item-value": "value",
@@ -45100,13 +45211,7 @@ module.exports={render:function (){var _vm=this;var _h=_vm.$createElement;var _c
     attrs: {
       "items": _vm.approvedLogs,
       "hide-actions": "",
-      "headers": _vm.approvedLogsHeader,
-      "pagination": _vm.pagination
-    },
-    on: {
-      "update:pagination": function($event) {
-        _vm.pagination = $event
-      }
+      "headers": _vm.approvedLogsHeader
     },
     scopedSlots: _vm._u([{
       key: "items",
@@ -45212,7 +45317,11 @@ module.exports={render:function (){var _vm=this;var _h=_vm.$createElement;var _c
     staticClass: "text-xs-center pt-2"
   }, [_c('v-pagination', {
     attrs: {
-      "length": _vm.pages
+      "length": _vm.pages,
+      "total-visible": 7
+    },
+    on: {
+      "input": _vm.next
     },
     model: {
       value: (_vm.pagination.page),
@@ -65634,6 +65743,7 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 //
 //
 //
+//
 
 
 /* harmony default export */ __webpack_exports__["default"] = ({
@@ -65642,6 +65752,7 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
             agentAssignments: [],
             agentAssignmentsHeader: [{ text: 'ID', align: 'left', value: 'id' }, { text: 'Assigned Agent', align: 'left', value: 'name' }, { text: 'Environment', align: 'left', value: 'environment', width: 15 }, { text: 'Order Number', align: 'left', value: 'order_items' }, { text: 'Product_look_up', align: 'left', value: 'product_look_up' }, { text: 'Customer Detail', align: 'left', value: 'customer_details' }, { text: 'Any Comments or Bugs to report', align: 'center', value: 'has_comments' }],
             pagination: {
+                page: 1,
                 rowsPerPage: 6,
                 totalItems: 0
             },
@@ -65663,9 +65774,13 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
     methods: {
         initialize: function initialize() {
             var app = this;
-            axios.get('agents/assignments').then(function (response) {
-                app.agentAssignments = response.data;
-                app.pagination.totalItems = response.data.length;
+            axios.get('agents/assignments', {
+                params: {
+                    page: 1
+                }
+            }).then(function (response) {
+                app.agentAssignments = response.data.assignments;
+                app.pagination.totalItems = response.data.count;
             }).catch(function (error) {
                 console.log(error);
             });
@@ -65691,16 +65806,27 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
             document.execCommand('selectAll');
             this.copied = document.execCommand('copy');
         },
-        setAllGood: function setAllGood(item) {
+        setAllGood: function setAllGood(item, index) {
             var assignmentId = item.id;
             var app = this;
             var params = new URLSearchParams();
             params.append('assignmentId', assignmentId);
             axios.put('agents/assignments', params).then(function (response) {
                 if (response.data.result == 'Failed') {
-                    alert(response.data.message);
+                    app.$notify({
+                        group: 'commentsSave',
+                        text: response.data.message,
+                        duration: 5000,
+                        type: 'warn'
+                    });
                 } else {
-                    app.initialize();
+                    app.agentAssignments[index].is_all_good = 1;
+                    app.$notify({
+                        group: 'commentsSave',
+                        text: 'Set assignment to all good successfully',
+                        duration: 5000,
+                        type: 'success'
+                    });
                 }
             }).catch(function (error) {
                 console.log(error);
@@ -65774,6 +65900,18 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
             }).catch(function (err) {
                 console.log(err);
             });
+        },
+        next: function next(page) {
+            var app = this;
+            axios.get('agents/assignments', {
+                params: {
+                    page: page
+                }
+            }).then(function (response) {
+                app.agentAssignments = response.data.assignments;
+            }).catch(function (error) {
+                console.log(error);
+            });
         }
     },
     computed: {
@@ -65789,7 +65927,7 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 /***/ (function(module, exports, __webpack_require__) {
 
 exports = module.exports = __webpack_require__(2)();
-exports.push([module.i, "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n", ""]);
+exports.push([module.i, "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n", ""]);
 
 /***/ }),
 /* 87 */
@@ -65975,13 +66113,7 @@ module.exports={render:function (){var _vm=this;var _h=_vm.$createElement;var _c
     attrs: {
       "items": _vm.agentAssignments,
       "hide-actions": "",
-      "headers": _vm.agentAssignmentsHeader,
-      "pagination": _vm.pagination
-    },
-    on: {
-      "update:pagination": function($event) {
-        _vm.pagination = $event
-      }
+      "headers": _vm.agentAssignmentsHeader
     },
     scopedSlots: _vm._u([{
       key: "items",
@@ -66046,7 +66178,7 @@ module.exports={render:function (){var _vm=this;var _h=_vm.$createElement;var _c
           },
           on: {
             "click": function($event) {
-              _vm.setAllGood(props.item)
+              _vm.setAllGood(props.item, props.index)
             }
           }
         }, [_vm._v("All Good")])], 1) : _c('div', [_c('b', {
@@ -66060,7 +66192,11 @@ module.exports={render:function (){var _vm=this;var _h=_vm.$createElement;var _c
     staticClass: "text-xs-center pt-2"
   }, [_c('v-pagination', {
     attrs: {
-      "length": _vm.pages
+      "length": _vm.pages,
+      "total-visible": 7
+    },
+    on: {
+      "input": _vm.next
     },
     model: {
       value: (_vm.pagination.page),

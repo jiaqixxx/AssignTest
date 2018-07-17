@@ -23,8 +23,8 @@ Route::post('/assignTests', 'AssignTestController@assignTests');
 
 Route::get('/assignments', 'AssignmentController@getWorkload');
 Route::put('/assignments', 'AssignmentController@approveOrNotAssignment');
-Route::get('/assignments/{status}', 'AssignmentController@getAssignmentsWithStatus');
-Route::get('/search', 'AssignmentController@searchAssignment');
+Route::get('/assignments/status', 'AssignmentController@getAssignmentsWithStatus');
+Route::get('/assignments/search', 'AssignmentController@searchAssignment');
 
 Route::get('/agents/assignments', 'AssignmentController@getAgentAssignments');
 Route::put('/agents/assignments', 'AssignmentController@setAllGood');

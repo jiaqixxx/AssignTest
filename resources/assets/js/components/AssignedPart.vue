@@ -1,6 +1,6 @@
 <template>
     <div>
-        <notifications group="commentsSave" position="top center"/>
+        <notifications group="approveAssignment" position="top center"/>
         <v-dialog v-model="dialog" max-width="900px">
             <v-card>
                 <v-card-title>
@@ -55,7 +55,6 @@
                     class="elevation-1"
                     hide-actions
                     :headers="assignmentAssignedHeader"
-                    :pagination.sync="pagination"
             >
                 <template slot="items" slot-scope="props">
                     <td class="text-xs-left">{{ props.item.id }}</td>
@@ -92,7 +91,7 @@
                         </v-layout>
                     </td>
                     <td class="text-xs-center">
-                        <v-checkbox v-model="checkbox"  @click.stop="approveAssignment(props.item)"></v-checkbox>
+                        <v-checkbox v-model="checkbox"  @click.stop="approveAssignment(props.item, props.index)"></v-checkbox>
                     </td>
                 </template>
             </v-data-table>
@@ -100,6 +99,8 @@
                 <v-pagination
                         v-model="pagination.page"
                         :length="pages"
+                        :total-visible="7"
+                        @input="next"
                 ></v-pagination>
             </div>
         </v-card>
@@ -112,6 +113,7 @@
     export default {
         data: () => ({
             pagination: {
+                page: 1,
                 rowsPerPage: 3,
                 totalItems: 0
             },
@@ -142,10 +144,15 @@
         methods: {
             initialize(){
                 let app = this;
-                axios.get('assignments/0')
+                axios.get('assignments/status', {
+                    params: {
+                        status: 0,
+                        page: 1
+                    }
+                })
                     .then(function (response) {
-                        app.assignmentsAssigned = response.data;
-                        app.pagination.totalItems = response.data.length;
+                        app.assignmentsAssigned = response.data.assignments;
+                        app.pagination.totalItems = response.data.count;
                     })
                     .catch(function (error) {
                         console.log(error);
@@ -163,7 +170,8 @@
                         console.log(error);
                     });
             },
-            approveAssignment(item){
+            approveAssignment(item, index){
+                console.log(index);
                 if(confirm('Are you sure to approve this assignment?')){
                     var assignmentId = item.id;
                     let app = this;
@@ -173,8 +181,19 @@
                     axios.put('assignments', params)
                         .then(function (response) {
                             if (response.data.result == 'Failed') {
-                                alert(response.data.message);
+                                app.$notify({
+                                    group: 'approveAssignment',
+                                    text: response.data.message,
+                                    duration: 5000,
+                                    type: 'warn'
+                                });
                             } else {
+                                app.$notify({
+                                    group: 'approveAssignment',
+                                    text: 'Assignment approved',
+                                    duration: 5000,
+                                    type: 'success'
+                                });
                                 app.initialize();
                                 EventBus.$emit('approveAssignment');
                             }
@@ -205,6 +224,21 @@
                 document.execCommand('selectAll');
                 this.copied = document.execCommand('copy');
             },
+            next(page){
+                let app = this;
+                axios.get('assignments/status', {
+                    params: {
+                        status: 0,
+                        page: page
+                    }
+                })
+                    .then(function (response) {
+                        app.assignmentsAssigned = response.data.assignments;
+                    })
+                    .catch(function (error) {
+                        console.log(error);
+                    });
+            }
         },
         computed: {
             pages () {

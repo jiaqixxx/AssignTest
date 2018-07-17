@@ -79,7 +79,6 @@
                         class="elevation-1"
                         hide-actions
                         :headers="agentAssignmentsHeader"
-                        :pagination.sync="pagination"
                 >
                     <template slot="items" slot-scope="props">
                         <td class="text-xs-left">{{ props.item.id }}</td>
@@ -111,7 +110,7 @@
                         <td class="text-xs-center">
                             <v-btn @click="showComments(props.item)">Comments/Bugs</v-btn>
                             <div v-if="props.item.is_all_good==0">
-                                <v-btn color="success" @click="setAllGood(props.item)">All Good</v-btn>
+                                <v-btn color="success" @click="setAllGood(props.item, props.index)">All Good</v-btn>
                             </div>
                             <div v-else="props.item.is_all_good==1">
                                 <b style="color:  mediumseagreen">Marked as all good</b>
@@ -123,6 +122,8 @@
                     <v-pagination
                             v-model="pagination.page"
                             :length="pages"
+                            :total-visible="7"
+                            @input="next"
                     ></v-pagination>
                 </div>
             </v-card>
@@ -146,6 +147,7 @@
                     {text: 'Any Comments or Bugs to report', align: 'center', value: 'has_comments'},
                 ],
                 pagination: {
+                    page: 1,
                     rowsPerPage: 6,
                     totalItems: 0
                 },
@@ -165,10 +167,14 @@
         methods: {
             initialize() {
                 let app = this;
-                axios.get('agents/assignments')
+                axios.get('agents/assignments', {
+                    params: {
+                        page: 1
+                    }
+                })
                     .then(function (response) {
-                        app.agentAssignments = response.data;
-                        app.pagination.totalItems = response.data.length;
+                        app.agentAssignments = response.data.assignments;
+                        app.pagination.totalItems = response.data.count;
                     })
                     .catch(function (error) {
                         console.log(error);
@@ -195,7 +201,7 @@
                 document.execCommand('selectAll');
                 this.copied = document.execCommand('copy');
             },
-            setAllGood(item){
+            setAllGood(item, index){
                 var assignmentId = item.id;
                 let app = this;
                 const params = new URLSearchParams();
@@ -203,9 +209,20 @@
                 axios.put('agents/assignments', params)
                     .then(function (response) {
                         if(response.data.result == 'Failed'){
-                            alert(response.data.message);
+                            app.$notify({
+                                group: 'commentsSave',
+                                text: response.data.message,
+                                duration: 5000,
+                                type: 'warn'
+                            });
                         }else{
-                            app.initialize();
+                            app.agentAssignments[index].is_all_good = 1;
+                            app.$notify({
+                                group: 'commentsSave',
+                                text: 'Set assignment to all good successfully',
+                                duration: 5000,
+                                type: 'success'
+                            });
                         }
                     })
                     .catch(function (error) {
@@ -287,6 +304,20 @@
                     .catch((err) => {
                         console.log(err);
                     })
+            },
+            next(page){
+                let app = this;
+                axios.get('agents/assignments', {
+                    params: {
+                        page: page
+                    }
+                })
+                    .then(function (response) {
+                        app.agentAssignments = response.data.assignments;
+                    })
+                    .catch(function (error) {
+                        console.log(error);
+                    });
             }
         },
         computed: {
