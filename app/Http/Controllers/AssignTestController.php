@@ -63,7 +63,6 @@ class AssignTestController extends Controller
                 Log::error($e);
                 DB::rollBack();
                 return json_encode(['result' => 'Failed', 'message' => 'Failed to assign tests']);
-
             }
         }
     }

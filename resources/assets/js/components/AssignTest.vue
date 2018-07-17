@@ -1,5 +1,6 @@
 <template>
     <v-flex xs7>
+        <notifications group="assignTest" position="top center"/>
         <v-layout row wrap>
             <v-flex xs5>
                 <v-subheader style="margin-left: 50px">Who is testing today?</v-subheader>
@@ -75,17 +76,34 @@
                 var agentId = this.agentDefault;
                 var numAssignments = this.numDefault[0];
                 if (numAssignments < 1) {
-                    alert('The number of testing assignments cannot be less than one');
+                    this.$notify({
+                        group: 'assignTest',
+                        text: 'The number of testing assignments cannot be less than one',
+                        duration: 5000,
+                        type: 'warn'
+                    });
                     return false;
                 }
+                let app = this;
                 const params = new URLSearchParams();
                 params.append('agentId', agentId);
                 params.append('numAssignments', numAssignments);
                 axios.post('assignTests', params)
                     .then(function (response) {
                         if (response.data.result == 'Failed') {
-                            alert(response.data.message);
+                            app.$notify({
+                                group: 'assignTest',
+                                text: response.data.message[0],
+                                duration: 5000,
+                                type: 'warn'
+                            });
                         } else {
+                            app.$notify({
+                                group: 'assignTest',
+                                text: 'Assignments assigned successfully',
+                                duration: 5000,
+                                type: 'success'
+                            });
                             EventBus.$emit('updateWorkload');
                         }
                     })
