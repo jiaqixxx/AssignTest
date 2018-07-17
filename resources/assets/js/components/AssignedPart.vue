@@ -171,7 +171,6 @@
                     });
             },
             approveAssignment(item, index){
-                console.log(index);
                 if(confirm('Are you sure to approve this assignment?')){
                     var assignmentId = item.id;
                     let app = this;
