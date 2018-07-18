@@ -49,7 +49,10 @@ class AssignTestController extends Controller
             DB::beginTransaction();
             try {
                 $notAssigned = $notAssigned->random($numAssignments)->toArray();
+
+                // TODO batch use DB::table()->insert([])
                 foreach ($notAssigned as $index => $orders) {
+
                     $result = new Assignment([
                         'order_id' => $orders['id'],
                         'assignee_id' => $agentId,

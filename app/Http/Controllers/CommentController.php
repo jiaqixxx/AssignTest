@@ -39,6 +39,8 @@ class CommentController extends Controller
                 echo json_encode(['result' => 'Failed']);
             }
         }else{
+
+            //TODO
             $comment = new Comment([
                 'assignment_id' => $assignmentId,
                 'comment' => $content
@@ -58,6 +60,7 @@ class CommentController extends Controller
         }
     }
 
+    // TODO
     public function saveImages(Request $request)
     {
         $image = $request->file('image');

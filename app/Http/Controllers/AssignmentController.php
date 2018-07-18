@@ -9,8 +9,10 @@ use App\Order;
 use App\Assignment;
 use Auth;
 
+
 class AssignmentController extends Controller
 {
+    
     public function getWorkload()
     {
         $workloads = Assignment::leftJoin('users', 'assignments.assignee_id', '=', 'users.id')
@@ -24,11 +26,13 @@ class AssignmentController extends Controller
 
     public static function getNotAssignedOrders()
     {
+        //TODO UTC?
         $today = Carbon::now()->startOfDay()->format('Y-m-d H:i:s');
         $assignedOrderIds = Assignment::select('order_id')
             ->where('created_at', '>', $today)
             ->get();
 
+        //TODO USE FLAG is_allocated will be better
         $notAssignedOrders = Order::select('id')
             ->where('created_at', '>', $today)
             ->whereNotIn('id', $assignedOrderIds)
@@ -107,10 +111,13 @@ class AssignmentController extends Controller
         $countAssignments = $assignments->count();
         $page = $request->input('page');
         $offset = ($page-1)*3;
+        //TODO LIMIT?
         $assignments = $assignments->select('users.id', 'users.name', 'orders.*', 'assignments.*')
             ->offset($offset)
             ->limit(3)
             ->get();
+
+        // TODO CONFIRM
         foreach($assignments as $index=>$assignment){
             $assignments[$index]['environment'] = json_decode($assignment['environment']);
             $assignments[$index]['order_items'] = json_decode($assignment['order_items']);
@@ -126,6 +133,7 @@ class AssignmentController extends Controller
         $offset = ($page - 1) * 6;
         $agentId = Auth::user()->id;
         $countAssignments = Assignment::where('assignee_id', '=', $agentId)->where('is_approved', '=', 0)->count();
+
         $assignments = Assignment::leftJoin('users', 'assignments.assignee_id', '=', 'users.id')
             ->leftJoin('orders', 'assignments.order_id', '=', 'orders.id')
             ->where('is_approved', '=', 0)
