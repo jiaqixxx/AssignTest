@@ -10,10 +10,24 @@
 | contains the "web" middleware group. Now create something great!
 |
 */
-
+//Route::get('/test', function(){
+//
+//
+//    $k1 = \App\Services\ApiClient\RestApiClientFactory::kibana();
+//
+//    return($k1->getTestData(\Carbon\Carbon::parse('2018-07-01 00:00:00'),\Carbon\Carbon::now()));
+//    return [$k1->getTestData(\Carbon\Carbon::parse('2018-07-06 00:00:00'),\Carbon\Carbon::parse('2018-07-13 00:00:00'))];
+//    $t = \App\Http\ApiClient\TestRestApiClient::instance();
+////    return [$k1->test(),$k3->test(),$t->test()];
+//    return [spl_object_hash($k1),spl_object_hash($k3)];
+//    $kibanaRest = new \App\Http\ApiClient\KibanaRestApiClient();
+//    $testRest = new \App\Http\ApiClient\TestRestApiClient();
+//    return [$kibanaRest->test(),$testRest->test()];
+//})->name('home');
 
 Auth::routes();
 
+//todo
 Route::get('/', 'HomeController@index')->name('home');
 Route::get('/your_assignments', 'AgentViewController@index')->name('your_assignments');
 Route::get('/assign_test', 'SupervisorViewController@index')->name('assign_test');

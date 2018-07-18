@@ -12,7 +12,7 @@ use Auth;
 
 class AssignmentController extends Controller
 {
-    
+
     public function getWorkload()
     {
         $workloads = Assignment::leftJoin('users', 'assignments.assignee_id', '=', 'users.id')
