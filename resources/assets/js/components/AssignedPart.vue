@@ -151,6 +151,7 @@
                     }
                 })
                     .then(function (response) {
+                        app.pagination.page = 1;
                         app.assignmentsAssigned = response.data.assignments;
                         app.pagination.totalItems = response.data.count;
                     })

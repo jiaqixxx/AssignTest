@@ -15,13 +15,13 @@ class CreateOrdersTable extends Migration
     {
         Schema::create('orders', function (Blueprint $table) {
             $table->increments('id');
-            $table->integer('remote_order_id')->nullable();
-            $table->dateTime('remote_order_created_date')->nullable();
-            $table->string('payment_method')->nullable();
-            $table->string('order_items')->nullable();
-            $table->string('environment')->nullable();
-            $table->string('product_look_up')->nullable();
-            $table->string('customer_details')->nullable();
+            $table->integer('remote_order_id');
+            $table->dateTime('remote_order_created_date');
+            $table->string('payment_method')->default('');
+            $table->text('order_items');
+            $table->text('environment');
+            $table->text('product_look_up');
+            $table->text('customer_details');
             $table->timestamps();
         });
     }

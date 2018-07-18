@@ -26,13 +26,11 @@ class AssignmentController extends Controller
 
     public static function getNotAssignedOrders()
     {
-        //TODO UTC?
         $today = Carbon::now()->startOfDay()->format('Y-m-d H:i:s');
         $assignedOrderIds = Assignment::select('order_id')
             ->where('created_at', '>', $today)
             ->get();
 
-        //TODO USE FLAG is_allocated will be better
         $notAssignedOrders = Order::select('id')
             ->where('created_at', '>', $today)
             ->whereNotIn('id', $assignedOrderIds)
@@ -48,14 +46,14 @@ class AssignmentController extends Controller
         ];
         $validator = Validator::make($request->all(), $rules);
         if($validator->fails()){
-            return json_encode(['result' => 'Failed', 'message' => 'missing data, cannot change assignment status']);
+            return ['result' => 'Failed', 'message' => 'missing data, cannot change assignment status'];
         }
         $result = Assignment::where('id', '=', $request->input('assignment_id'))
             ->update(['is_approved' => $request->input('status')]);
         if ($result) {
             return $result;
         } else {
-            return json_encode(['result' => 'Failed', 'message' => 'Failed to change assignment status']);
+            return ['result' => 'Failed', 'message' => 'Failed to change assignment status'];
         }
     }
 
@@ -78,7 +76,7 @@ class AssignmentController extends Controller
             $assignments[$index]['customer_details'] = json_decode($assignment['customer_details']);
             $assignments[$index]['product_look_up'] = json_decode($assignment['product_look_up']);
         }
-        return json_encode(['count' => $countAssignments, 'assignments' => $assignments]);
+        return ['count' => $countAssignments, 'assignments' => $assignments];
     }
 
     public function searchAssignment(Request $request)
@@ -92,7 +90,7 @@ class AssignmentController extends Controller
         $validator = Validator::make($request->all(),$rules);
 
         if($validator->fails()){
-            return json_encode(['result' => 'Failed', 'message' => 'Failed to search']);
+            return ['result' => 'Failed', 'message' => 'Failed to search'];
         }
         $assignments = Assignment::leftJoin('users', 'assignments.assignee_id', '=', 'users.id')
             ->leftJoin('orders', 'assignments.order_id', '=', 'orders.id');
@@ -111,20 +109,18 @@ class AssignmentController extends Controller
         $countAssignments = $assignments->count();
         $page = $request->input('page');
         $offset = ($page-1)*3;
-        //TODO LIMIT?
         $assignments = $assignments->select('users.id', 'users.name', 'orders.*', 'assignments.*')
             ->offset($offset)
             ->limit(3)
             ->get();
 
-        // TODO CONFIRM
         foreach($assignments as $index=>$assignment){
             $assignments[$index]['environment'] = json_decode($assignment['environment']);
             $assignments[$index]['order_items'] = json_decode($assignment['order_items']);
             $assignments[$index]['customer_details'] = json_decode($assignment['customer_details']);
             $assignments[$index]['product_look_up'] = json_decode($assignment['product_look_up']);
         }
-        return json_encode(['count' => $countAssignments, 'assignments' => $assignments]);
+        return ['count' => $countAssignments, 'assignments' => $assignments];
     }
 
     public function getAgentAssignments(Request $request)
@@ -148,7 +144,7 @@ class AssignmentController extends Controller
             $assignments[$index]['customer_details'] = json_decode($assignment['customer_details']);
             $assignments[$index]['product_look_up'] = json_decode($assignment['product_look_up']);
         }
-        return json_encode(['count' => $countAssignments, 'assignments' => $assignments]);
+        return ['count' => $countAssignments, 'assignments' => $assignments];
     }
 
     public function setAllGood(Request $request)
@@ -157,7 +153,7 @@ class AssignmentController extends Controller
         $result = Assignment::where('id', '=', $assignmentId)
             ->update(['is_all_good' => 1]);
         if(!$result){
-            echo json_encode(['result' => 'Failed', 'message' => 'Failed to set assignment to all good']);
+            echo ['result' => 'Failed', 'message' => 'Failed to set assignment to all good'];
         }else{
             echo $result;
         }

@@ -27,10 +27,9 @@
 
 Auth::routes();
 
-//todo
-Route::get('/', 'HomeController@index')->name('home');
-Route::get('/your_assignments', 'AgentViewController@index')->name('your_assignments');
-Route::get('/assign_test', 'SupervisorViewController@index')->name('assign_test');
+Route::get('/', 'HomeController@index')->middleware(['auth', 'role'])->name('home');
+Route::get('/your_assignments', 'AgentViewController@index')->middleware('auth')->name('your_assignments');
+Route::get('/assign_test', 'SupervisorViewController@index')->middleware('auth')->name('assign_test');
 
 Route::get('/users', 'AssignTestController@getAgents');
 Route::post('/assignTests', 'AssignTestController@assignTests');

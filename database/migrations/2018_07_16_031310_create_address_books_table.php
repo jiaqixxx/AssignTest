@@ -15,12 +15,12 @@ class CreateAddressBooksTable extends Migration
     {
         Schema::create('address_books', function (Blueprint $table) {
             $table->increments('id');
-            $table->string('company')->nullable();
-            $table->string('suburb')->nullable();
-            $table->string('street')->nullable();
-            $table->string('postcode')->nullable();
-            $table->string('city')->nullable();
-            $table->string('state')->nullable();
+            $table->string('company')->default();
+            $table->string('suburb')->default('');
+            $table->string('street')->default('');
+            $table->string('postcode')->default('');
+            $table->string('city')->default('');
+            $table->string('state')->default('');
             $table->timestamps();
         });
     }

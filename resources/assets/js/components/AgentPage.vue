@@ -196,13 +196,13 @@
                 }
             },
             copy(index) {
-                var input = this.$refs.input[index];
+                let input = this.$refs.input[index];
                 input.focus();
                 document.execCommand('selectAll');
                 this.copied = document.execCommand('copy');
             },
             setAllGood(item, index){
-                var assignmentId = item.id;
+                let assignmentId = item.id;
                 let app = this;
                 const params = new URLSearchParams();
                 params.append('assignmentId', assignmentId);
@@ -232,7 +232,7 @@
             },
             showComments(item){
                 this.assignmentId = item.id;
-                var assignmentId = item.id;
+                let assignmentId = item.id;
                 this.content = '';
                 let app = this;
                 axios.get('comments/' +assignmentId)
@@ -251,8 +251,8 @@
                     });
             },
             saveContent(){
-                var assignmentId = this.assignmentId;
-                var content = this.content;
+                let assignmentId = this.assignmentId;
+                let content = this.content;
                 if(!content){
                     this.commentsDialog = false;
                     return false;
@@ -285,18 +285,36 @@
                     });
             },
             handleImageAdded: function(file, Editor, cursorLocation, resetUploader){
-                var assignmentId = this.assignmentId;
-                var formData = new FormData();
+                let assignmentId = this.assignmentId;
+                let formData = new FormData();
                 formData.append('image', file);
                 formData.append('assignmentId', assignmentId);
-
+                if(file.size > 50000){
+                    this.$notify({
+                        group: 'commentsSave',
+                        text: 'Failed to upload Image (Image size exceeds 5kb)',
+                        duration: 5000,
+                        type: 'warn'
+                    });
+                    return false;
+                }
+                let app = this;
                 axios({
                     url: 'comments/images',
                     method: 'POST',
                     data: formData
                 })
-                    .then((result) => {
-                        let url = result.data; // Get url from response
+                    .then((response) => {
+                        if(response.data.result == 'Failed'){
+                            app.$notify({
+                                group: 'commentsSave',
+                                text: 'Failed to upload Image (Image size exceeds 5kb)',
+                                duration: 5000,
+                                type: 'warn'
+                            });
+                            return false;
+                        }
+                        let url = response.data; // Get url from response
                         Editor.insertEmbed(cursorLocation, 'image', url);
                         resetUploader();
 

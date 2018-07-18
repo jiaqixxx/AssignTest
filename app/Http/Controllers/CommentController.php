@@ -24,10 +24,10 @@ class CommentController extends Controller
             'content' => 'string|required'
         ];
         $validator = Validator::make($request->all(),$rules);
-
         if($validator->fails()){
-            return json_encode(['result' => 'Failed']);
+            return ['result' => 'Failed'];
         }
+
         $assignmentId = $request->input('assignmentId');
         $content = $request->input('content');
         if(Comment::where('assignment_id', '=', $assignmentId)->exists()){
@@ -36,11 +36,9 @@ class CommentController extends Controller
             if($result){
                 echo $result;
             }else{
-                echo json_encode(['result' => 'Failed']);
+                echo ['result' => 'Failed'];
             }
         }else{
-
-            //TODO
             $comment = new Comment([
                 'assignment_id' => $assignmentId,
                 'comment' => $content
@@ -52,18 +50,21 @@ class CommentController extends Controller
                 if($updateAssignment){
                     echo $updateAssignment;
                 }else{
-                    echo json_encode(['result' => 'Failed']);
+                    echo ['result' => 'Failed'];
                 }
             }else{
-                echo json_encode(['result' => 'Failed']);
+                echo ['result' => 'Failed'];
             }
         }
     }
 
-    // TODO
     public function saveImages(Request $request)
     {
         $image = $request->file('image');
+        $size = $image->getClientSize();
+        if($size > 50000) {
+            return ['result' => 'Failed'];
+        }
         $filename = $request->input('assignmentId').'_'.time().'.'.$image->getClientOriginalExtension();
         $image->storeAs('public/images', $filename);
         return 'storage/images/'.$filename;

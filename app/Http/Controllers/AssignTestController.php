@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\User;
 use App\Orders;
 use App\Assignment;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -46,26 +47,29 @@ class AssignTestController extends Controller
         if ($validator->fails()) {
             return $validator->messages();
         } else {
+            $today = Carbon::now()->startOfDay()->format('Y-m-d H:i:s');
             DB::beginTransaction();
             try {
                 $notAssigned = $notAssigned->random($numAssignments)->toArray();
-
-                // TODO batch use DB::table()->insert([])
+                $insertData = [];
                 foreach ($notAssigned as $index => $orders) {
-
-                    $result = new Assignment([
+                    $insertData[] = [
                         'order_id' => $orders['id'],
                         'assignee_id' => $agentId,
-                        'assigned_by' => '2'
-                    ]);
-                    $result->save();
+                        'assigned_by' => '2',
+                        'created_at' => $today,
+                        'updated_at' => $today
+                    ];
+                }
+                if($insertData){
+                    DB::table('assignments')->insert($insertData);
                 }
                 DB::commit();
-                return json_encode(['result' => 'success']);
+                return ['result' => 'success'];
             } catch (\Exception $e) {
                 Log::error($e);
                 DB::rollBack();
-                return json_encode(['result' => 'Failed', 'message' => 'Failed to assign tests']);
+                return ['result' => 'Failed', 'message' => 'Failed to assign tests'];
             }
         }
     }

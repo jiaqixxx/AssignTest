@@ -93,7 +93,7 @@
                         if (response.data.result == 'Failed') {
                             app.$notify({
                                 group: 'assignTest',
-                                text: response.data.message[0],
+                                text: response.data.message,
                                 duration: 5000,
                                 type: 'warn'
                             });
