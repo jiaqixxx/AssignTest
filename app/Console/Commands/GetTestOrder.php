@@ -41,14 +41,14 @@ class GetTestOrder extends Command
     {
         //
         if (!($from = $this->option('from'))) {
-            $from = Carbon::now()->timezone('Australia/Sydney')->startOfDay();
+            $from = Carbon::now()->timezone('Australia/Sydney')->startOfDay()->subDay();
         }else{
             $from = Carbon::parse( $this->option('from'),new \DateTimeZone('Australia/Sydney'))->startOfDay();
         }
 
 
         if (!($to = $this->option('to'))) {
-            $to = Carbon::now()->timezone('Australia/Sydney')->endOfDay();
+            $to = Carbon::now()->timezone('Australia/Sydney')->endOfDay()->subDay();
         }else{
             $to = Carbon::parse( $this->option('to'),new \DateTimeZone('Australia/Sydney'))->endOfDay();
         }

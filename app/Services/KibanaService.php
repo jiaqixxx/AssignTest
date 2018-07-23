@@ -29,8 +29,8 @@ class KibanaService
     {
         $data = RestApiClientFactory::kibana()->getTestData($from, $to);
 
-        $totalCustomers = Customer::count();
-        $totalAddress = AddressBook::count();
+        $totalCustomers = Customer::where('is_used',false)->count();
+        $totalAddress = AddressBook::where('is_used',false)->count();
 
         try {
             DB::beginTransaction();
@@ -80,6 +80,10 @@ class KibanaService
                         ];
                         $order->customer_details = $customerDetails;
 
+                        $randomCustomer->is_used = true;
+                        $randomAddressBook->is_used = true;
+                        $randomCustomer->save();
+                        $randomAddressBook->save();
                     }
                     $order->remote_order_id = $orderId;
                     $order->order_items = $orderItems;
