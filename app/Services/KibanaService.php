@@ -11,6 +11,7 @@ namespace App\Services;
 
 use App\AddressBook;
 use App\Customer;
+use App\Environment;
 use App\Order;
 use App\Services\ApiClient\KibanaRestApiClient;
 use App\Services\ApiClient\RestApiClientFactory;
@@ -50,7 +51,7 @@ class KibanaService
                     $orderId = isset($row['order_id']) ? $row['order_id'] : null;
                     $orderItems = isset($row['items']) ? $row['items'] : null;
 
-                    $paymentMethod = isset($row['payment_method']) ? $row['payment_method'] : null;
+//                    $paymentMethod = isset($row['payment_method']) ? $row['payment_method'] : null;
 
                     if ($totalCustomers >= 1 && $totalAddress >= 1) {
                         $randCustomer = rand(1, $totalCustomers);
@@ -83,8 +84,8 @@ class KibanaService
                     }
                     $order->remote_order_id = $orderId;
                     $order->order_items = $orderItems;
-                    $order->environment = $env;
-                    $order->payment_method = $paymentMethod;
+                    $order->environment = $this->randmisedEnvironment();
+                    $order->payment_method = $this->randmisedPaymentMethod();
                     $order->product_look_up = [
                         '1' => 'Search Keyword',
                         '2' => 'Browse Category',
@@ -100,5 +101,24 @@ class KibanaService
             Log::error($e);
             DB::rollBack();
         }
+    }
+
+    public function randmisedPaymentMethod()
+    {
+        $data = [
+            0 => 'Bank Transfer',
+            1 => 'Credit Card',
+            2 => 'Pay Pal'
+        ];
+
+        $randomMethod = $data[rand(0, 2)];
+
+        return $randomMethod;
+    }
+
+    public function randmisedEnvironment()
+    {
+        $rand = rand(1, 246);
+        return Environment::select('type', 'system', 'software')->where('id', $rand)->first()->toArray();
     }
 }
